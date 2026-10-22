@@ -1,33 +1,28 @@
 <%- include('partials/topo') %>
-<section class="destaque">
-  <h1>Agenda de eventos</h1>
-  <p>Eventos institucionais aprovados de <strong><%= inicio.toLocaleDateString('pt-BR') %></strong>
-     a <strong><%= fim.toLocaleDateString('pt-BR') %></strong>.</p>
-</section>
+<%
+  const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const SEMANA = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+  let mesAtual = '';
+%>
+<h1>Agenda de eventos</h1>
+<p class="subtitulo">Eventos aprovados de <%= inicio.toLocaleDateString('pt-BR') %> a <%= fim.toLocaleDateString('pt-BR') %>.</p>
 
 <% if (!eventos.length) { %>
   <p class="vazio">Nenhum evento aprovado neste período.</p>
-<% } else { %>
-<div class="tabela-scroll">
-<table>
-  <thead>
-    <tr><th>Data</th><th>Evento</th><th>Tema</th><th>Horário</th><th>Local</th><th>Palestrante</th><th>Realização</th></tr>
-  </thead>
-  <tbody>
-  <% for (const e of eventos) { %>
-    <tr>
-      <td class="nowrap"><%= dataBR(e.data) %></td>
-      <td><strong><%= e.nome %></strong></td>
-      <td><span class="etiqueta"><%= e.tema %></span></td>
-      <td class="nowrap"><%= e.hora_inicio %> – <%= e.hora_fim %></td>
-      <td><%= e.local %></td>
-      <td><%= e.palestrante %></td>
-      <td><%= e.curso %></td>
-    </tr>
-  <% } %>
-  </tbody>
-</table>
-</div>
 <% } %>
-<p class="dica">Quer solicitar um evento? <a href="/login">Entre com seu usuário</a>. Dúvidas: setor de Eventos.</p>
+<% for (const e of eventos) {
+     const [ano, mes, dia] = e.data.split('-').map(Number);
+     const chaveMes = `${MESES[mes - 1]} de ${ano}`;
+     if (chaveMes !== mesAtual) { mesAtual = chaveMes; %>
+  <h2 class="mes"><%= chaveMes %></h2>
+<%   } %>
+  <article class="evento">
+    <div class="dia"><strong><%= String(dia).padStart(2, '0') %></strong><span><%= SEMANA[new Date(ano, mes - 1, dia).getDay()] %></span></div>
+    <div>
+      <h3><%= e.nome %></h3>
+      <div class="meta"><%= e.tema %> · <%= e.local %> · <%= e.palestrante %> · <%= e.curso %></div>
+    </div>
+    <div class="hora"><%= e.hora_inicio %> – <%= e.hora_fim %></div>
+  </article>
+<% } %>
 <%- include('partials/rodape') %>

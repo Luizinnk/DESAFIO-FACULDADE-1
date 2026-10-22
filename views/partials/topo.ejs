@@ -7,27 +7,30 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+<% const at = (p) => (p === '/' ? caminho === '/' : caminho.startsWith(p)) ? 'ativo' : ''; %>
 <header class="topo">
-  <a href="/" class="marca">AgendaUni <small>Eventos Institucionais</small></a>
-  <nav>
-    <a href="/" class="<%= caminho === '/' ? 'ativo' : '' %>">Agenda pública</a>
-    <% if (usuario) { %>
-      <a href="/minhas" class="<%= caminho.startsWith('/minhas') || caminho.startsWith('/solicitacoes') ? 'ativo' : '' %>">Minhas solicitações</a>
-      <% if (usuario.perfil === 'ADMIN') { %>
-        <% const at = (p) => caminho.startsWith(p) ? 'ativo' : ''; %>
-        <a href="/admin/solicitacoes" class="<%= at('/admin/solicitacoes') %>">Analisar</a>
-        <a href="/admin/cadastros/temas" class="<%= at('/admin/cadastros') %>">Cadastros</a>
+  <div class="topo-conteudo">
+    <a href="/" class="marca">AgendaUni</a>
+    <nav class="menu">
+      <a href="/" class="<%= at('/') %>">Agenda</a>
+      <% if (usuario && usuario.perfil === 'ADMIN') { %>
+        <a href="/admin/solicitacoes" class="<%= at('/admin/solicitacoes') %>">Solicitações</a>
+        <a href="/admin/cadastros" class="<%= at('/admin/cadastros') %>">Cadastros</a>
         <a href="/admin/usuarios" class="<%= at('/admin/usuarios') %>">Usuários</a>
         <a href="/admin/relatorio" class="<%= at('/admin/relatorio') %>">Relatório</a>
+      <% } else if (usuario) { %>
+        <a href="/minhas" class="<%= at('/minhas') || at('/solicitacoes') %>">Minhas solicitações</a>
       <% } %>
-      <form method="post" action="/logout" class="inline">
-        <span class="quem"><%= usuario.nome %> (<%= usuario.perfil === 'ADMIN' ? 'Admin' : 'Solicitante' %>)</span>
-        <button class="link">Sair</button>
-      </form>
-    <% } else { %>
-      <a href="/login" class="botao">Entrar</a>
-    <% } %>
-  </nav>
+    </nav>
+    <div class="conta">
+      <% if (usuario) { %>
+        <span class="quem"><%= usuario.nome %></span>
+        <form method="post" action="/logout" class="inline"><button class="link">Sair</button></form>
+      <% } else { %>
+        <a href="/login" class="botao">Entrar</a>
+      <% } %>
+    </div>
+  </div>
 </header>
 <main>
 <% if (flash) { %>

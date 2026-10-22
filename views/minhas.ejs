@@ -1,7 +1,7 @@
 <%- include('partials/topo') %>
 <div class="titulo-linha">
   <h1>Minhas solicitações</h1>
-  <a href="/solicitacoes/nova" class="botao">+ Nova solicitação</a>
+  <a href="/solicitacoes/nova" class="botao">Nova solicitação</a>
 </div>
 
 <% if (!eventos.length) { %>
@@ -9,16 +9,13 @@
 <% } else { %>
 <div class="tabela-scroll">
 <table>
-  <thead><tr><th>Evento</th><th>Data</th><th>Horário</th><th>Local</th><th>Status</th><th></th></tr></thead>
+  <thead><tr><th>Evento</th><th>Quando</th><th>Status</th></tr></thead>
   <tbody>
   <% for (const e of eventos) { %>
     <tr>
-      <td><%= e.nome %></td>
-      <td class="nowrap"><%= dataBR(e.data) %></td>
-      <td class="nowrap"><%= e.hora_inicio || '—' %> – <%= e.hora_fim || '—' %></td>
-      <td><%= e.local || '—' %></td>
+      <td><a href="/solicitacoes/<%= e.id %>"><%= e.nome %></a><span class="secundario-texto"><%= e.local || 'Local não definido' %></span></td>
+      <td class="nowrap"><%= dataBR(e.data) %><span class="secundario-texto"><%= e.hora_inicio || '—' %> – <%= e.hora_fim || '—' %></span></td>
       <td><span class="status <%= e.status %>"><%= STATUS_TEXTO[e.status] %></span></td>
-      <td><a href="/solicitacoes/<%= e.id %>">Abrir</a></td>
     </tr>
   <% } %>
   </tbody>

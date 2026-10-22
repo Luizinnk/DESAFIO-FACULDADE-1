@@ -8,7 +8,7 @@
 
 <div class="duas-colunas">
   <form method="post" action="/admin/cadastros/<%= tipo %><%= editando ? '/' + editando.id : '' %>" class="cartao">
-    <h2><%= editando ? 'Editar' : 'Novo' %> — <%= cfg.titulo %></h2>
+    <h2><%= editando ? 'Editar' : 'Novo cadastro' %></h2>
     <% for (const c of campos) { %>
       <label><%= c.rotulo %>
         <% if (c.tipo === 'select') { %>
@@ -24,15 +24,13 @@
       </label>
     <% } %>
     <% if (cfg.comRecursos) { %>
-      <fieldset>
-        <legend>Recursos disponíveis neste local</legend>
-        <div class="checks">
+      <div class="dica">Recursos disponíveis neste local</div>
+        <div class="checks" style="margin:6px 0 14px">
           <% for (const r of todosRecursos) { %>
             <label><input type="checkbox" name="recursos" value="<%= r.id %>"
               <%= editando && editando.recursos.includes(r.id) ? 'checked' : '' %>> <%= r.nome %></label>
           <% } %>
         </div>
-      </fieldset>
     <% } %>
     <div class="acoes">
       <button class="botao"><%= editando ? 'Salvar' : 'Cadastrar' %></button>
@@ -52,7 +50,7 @@
       <tr>
         <% for (const c of campos) { %><td><%= c.tipo === 'select' ? item[c.nome + '_nome'] : item[c.nome] %></td><% } %>
         <% if (cfg.comRecursos) { %><td><%= item.recursos_nomes || '—' %></td><% } %>
-        <td class="nowrap">
+        <td class="acoes-linha">
           <a href="?editar=<%= item.id %>">Editar</a>
           <form method="post" action="/admin/cadastros/<%= tipo %>/<%= item.id %>/excluir" class="inline"
                 onsubmit="return confirm('Excluir este cadastro?')">
@@ -65,5 +63,4 @@
   </table>
   </div>
 </div>
-<p class="dica">A exclusão só é permitida quando o cadastro não está vinculado a eventos ou a outros cadastros.</p>
 <%- include('../partials/rodape') %>

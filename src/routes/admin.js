@@ -147,6 +147,8 @@ function config(req, res) {
   return cfg;
 }
 
+router.get('/cadastros', (req, res) => res.redirect('/admin/cadastros/temas'));
+
 router.get('/cadastros/:tipo', (req, res) => {
   const cfg = config(req, res);
   if (!cfg) return;

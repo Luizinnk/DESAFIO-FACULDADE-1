@@ -2,7 +2,6 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const db = require('../db');
-const { avisar } = require('../middlewares');
 
 router.get('/login', (req, res) => {
   if (req.session.usuario) return res.redirect(destinoInicial(req.session.usuario));
@@ -25,7 +24,6 @@ router.post('/login', (req, res) => {
 
   req.session.regenerate(() => {
     req.session.usuario = { id: u.id, nome: u.nome, perfil: u.perfil };
-    avisar(req, 'ok', `Bem-vindo(a), ${u.nome}!`);
     res.redirect(destinoInicial(req.session.usuario));
   });
 });

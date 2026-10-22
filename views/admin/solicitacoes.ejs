@@ -1,5 +1,5 @@
 <%- include('../partials/topo') %>
-<h1>Analisar solicitações</h1>
+<h1>Solicitações</h1>
 <nav class="abas">
   <% for (const s of STATUS) { %>
     <a href="?status=<%= s %>" class="<%= s === status ? 'ativo' : '' %>"><%= STATUS_TEXTO[s] %></a>
@@ -11,17 +11,13 @@
 <% } else { %>
 <div class="tabela-scroll">
 <table>
-  <thead><tr><th>#</th><th>Evento</th><th>Data</th><th>Horário</th><th>Local</th><th>Solicitante</th><th></th></tr></thead>
+  <thead><tr><th>Evento</th><th>Quando</th><th>Solicitante</th></tr></thead>
   <tbody>
   <% for (const e of eventos) { %>
     <tr>
-      <td><%= e.id %></td>
-      <td><%= e.nome %></td>
-      <td class="nowrap"><%= dataBR(e.data) %></td>
-      <td class="nowrap"><%= e.hora_inicio %> – <%= e.hora_fim %></td>
-      <td><%= e.local %></td>
+      <td><a href="/admin/solicitacoes/<%= e.id %>"><%= e.nome %></a><span class="secundario-texto"><%= e.local %></span></td>
+      <td class="nowrap"><%= dataBR(e.data) %><span class="secundario-texto"><%= e.hora_inicio %> – <%= e.hora_fim %></span></td>
       <td><%= e.solicitante %></td>
-      <td><a href="/admin/solicitacoes/<%= e.id %>">Abrir</a></td>
     </tr>
   <% } %>
   </tbody>

@@ -22,15 +22,14 @@
 
   <div class="tabela-scroll">
   <table>
-    <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Situação</th><th></th></tr></thead>
+    <thead><tr><th>Nome</th><th>Perfil</th><th>Situação</th><th></th></tr></thead>
     <tbody>
     <% for (const u of usuarios) { %>
       <tr class="<%= u.ativo ? '' : 'inativo' %>">
-        <td><%= u.nome %></td>
-        <td><%= u.email %></td>
+        <td><%= u.nome %><span class="secundario-texto"><%= u.email %></span></td>
         <td><%= u.perfil === 'ADMIN' ? 'Administrador' : 'Solicitante' %></td>
         <td><%= u.ativo ? 'Ativo' : 'Desativado' %></td>
-        <td class="nowrap">
+        <td class="acoes-linha">
           <a href="?editar=<%= u.id %>">Editar</a>
           <form method="post" action="/admin/usuarios/<%= u.id %>/ativo" class="inline">
             <button class="link"><%= u.ativo ? 'Desativar' : 'Reativar' %></button>
