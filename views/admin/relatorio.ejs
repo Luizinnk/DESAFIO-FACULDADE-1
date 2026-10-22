@@ -1,0 +1,46 @@
+<%- include('../partials/topo') %>
+<h1>Relatório de eventos</h1>
+<form method="get" class="cartao filtros">
+  <label>Data inicial <input type="date" name="data_inicio" value="<%= filtros.data_inicio || '' %>"></label>
+  <label>Data final <input type="date" name="data_fim" value="<%= filtros.data_fim || '' %>"></label>
+  <label>Curso / coordenação
+    <select name="curso_id">
+      <option value="">Todos</option>
+      <% for (const c of cursos) { %><option value="<%= c.id %>" <%= String(c.id) === filtros.curso_id ? 'selected' : '' %>><%= c.nome %></option><% } %>
+    </select>
+  </label>
+  <label>Tema
+    <select name="tema_id">
+      <option value="">Todos</option>
+      <% for (const t of temas) { %><option value="<%= t.id %>" <%= String(t.id) === filtros.tema_id ? 'selected' : '' %>><%= t.nome %></option><% } %>
+    </select>
+  </label>
+  <label>Status
+    <select name="status">
+      <option value="">Todos (exceto rascunho)</option>
+      <% for (const s of STATUS) { %><option value="<%= s %>" <%= s === filtros.status ? 'selected' : '' %>><%= STATUS_TEXTO[s] %></option><% } %>
+    </select>
+  </label>
+  <div class="acoes">
+    <button class="botao">Filtrar</button>
+    <a href="/admin/relatorio.csv?<%= queryString %>" class="botao secundario">Exportar CSV</a>
+    <a href="/admin/relatorio" class="link">Limpar</a>
+  </div>
+</form>
+
+<p><strong><%= linhas.length %></strong> evento(s) encontrado(s).</p>
+<div class="tabela-scroll">
+<table>
+  <thead><tr><th>Evento</th><th>Data</th><th>Início</th><th>Fim</th><th>Tema</th><th>Curso</th><th>Centro de custo</th><th>Local</th><th>Solicitante</th><th>Status</th></tr></thead>
+  <tbody>
+  <% for (const l of linhas) { %>
+    <tr>
+      <td><%= l.nome %></td><td class="nowrap"><%= dataBR(l.data) %></td><td><%= l.hora_inicio %></td><td><%= l.hora_fim %></td>
+      <td><%= l.tema %></td><td><%= l.curso %></td><td><%= l.centro_custo %></td><td><%= l.local %></td>
+      <td><%= l.solicitante %></td><td><span class="status <%= l.status %>"><%= STATUS_TEXTO[l.status] %></span></td>
+    </tr>
+  <% } %>
+  </tbody>
+</table>
+</div>
+<%- include('../partials/rodape') %>

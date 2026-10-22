@@ -1,0 +1,132 @@
+<%- include('partials/topo') %>
+<% const v = (c) => ev[c] ?? ''; %>
+<% const simNao = (campo, rotulo) => { %>
+  <fieldset class="simnao">
+    <legend><%= rotulo %> *</legend>
+    <label><input type="radio" name="<%= campo %>" value="1" <%= ev[campo] === 1 ? 'checked' : '' %>> Sim</label>
+    <label><input type="radio" name="<%= campo %>" value="0" <%= ev[campo] === 0 ? 'checked' : '' %>> Não</label>
+  </fieldset>
+<% } %>
+
+<h1><%= titulo %></h1>
+<% if (ev.status === 'REJEITADO' && ev.motivo_rejeicao) { %>
+  <div class="aviso erro"><strong>Motivo da rejeição:</strong> <%= ev.motivo_rejeicao %></div>
+<% } %>
+<% if (erros.length) { %>
+  <div class="aviso erro"><ul><% for (const e of erros) { %><li><%= e %></li><% } %></ul></div>
+<% } %>
+
+<form method="post" action="<%= acao %>" class="cartao formulario">
+  <p class="dica">Campos com * são obrigatórios para <strong>enviar</strong>. O rascunho pode ficar incompleto.</p>
+
+  <div class="grade">
+    <label class="largo">Nome do evento *
+      <input name="nome" value="<%= v('nome') %>" maxlength="150">
+    </label>
+    <label>Tema *
+      <select name="tema_id">
+        <option value="">Selecione…</option>
+        <% for (const t of temas) { %><option value="<%= t.id %>" <%= ev.tema_id === t.id ? 'selected' : '' %>><%= t.nome %></option><% } %>
+      </select>
+    </label>
+    <label>Data *
+      <input type="date" name="data" value="<%= v('data') %>">
+    </label>
+    <label>Horário inicial *
+      <input type="time" name="hora_inicio" value="<%= v('hora_inicio') %>">
+    </label>
+    <label>Horário final *
+      <input type="time" name="hora_fim" value="<%= v('hora_fim') %>">
+    </label>
+    <label>Local *
+      <select name="local_id" id="local">
+        <option value="">Selecione…</option>
+        <% for (const l of locais) { %><option value="<%= l.id %>" <%= ev.local_id === l.id ? 'selected' : '' %>><%= l.nome %></option><% } %>
+      </select>
+    </label>
+    <label>Curso / coordenação *
+      <select name="curso_id" id="curso">
+        <option value="">Selecione…</option>
+        <% for (const c of cursos) { %><option value="<%= c.id %>" data-cc="<%= c.centro_custo %>" <%= ev.curso_id === c.id ? 'selected' : '' %>><%= c.nome %></option><% } %>
+      </select>
+    </label>
+    <label>Centro de custo (automático)
+      <input id="centro" readonly tabindex="-1" placeholder="Escolha o curso">
+    </label>
+    <label>Solicitante (nome livre) *
+      <input name="solicitante" value="<%= v('solicitante') %>">
+    </label>
+    <label>Palestrante *
+      <input name="palestrante" value="<%= v('palestrante') %>">
+    </label>
+    <label>Público-alvo *
+      <input name="publico_alvo" value="<%= v('publico_alvo') %>">
+    </label>
+    <label class="largo">Justificativa *
+      <textarea name="justificativa" rows="2"><%= v('justificativa') %></textarea>
+    </label>
+    <label class="largo">Objetivo *
+      <textarea name="objetivo" rows="2"><%= v('objetivo') %></textarea>
+    </label>
+  </div>
+
+  <div class="linha-simnao">
+    <% simNao('cerimonial', 'Cerimonial') %>
+    <% simNao('inscricoes', 'Haverá inscrições') %>
+    <% simNao('declaracoes', 'Necessidade de declarações') %>
+  </div>
+
+  <fieldset>
+    <legend>Recursos necessários (dependem do local)</legend>
+    <div id="recursos" class="checks"><span class="dica">Escolha um local para ver os recursos.</span></div>
+  </fieldset>
+
+  <label>Observações
+    <textarea name="observacoes" rows="2"><%= v('observacoes') %></textarea>
+  </label>
+
+  <div class="acoes">
+    <% if (modo === 'admin') { %>
+      <button name="acao" value="enviar" class="botao">Salvar alterações</button>
+      <a href="/admin/solicitacoes/<%= ev.id %>" class="botao secundario">Voltar</a>
+    <% } else { %>
+      <button name="acao" value="salvar" class="botao secundario">Salvar rascunho</button>
+      <button name="acao" value="enviar" class="botao">Enviar para aprovação</button>
+      <a href="/minhas" class="link">Voltar</a>
+    <% } %>
+  </div>
+</form>
+
+<script>
+  // Recursos de cada local vindos do banco: { localId: [{id, nome}] }
+  const recursosPorLocal = <%- JSON.stringify(recursosPorLocal).replace(/</g, '\\u003c') %>;
+  let marcados = <%- JSON.stringify(ev.recursos || []) %>;
+  const selLocal = document.getElementById('local');
+  const caixa = document.getElementById('recursos');
+
+  function mostrarRecursos() {
+    const lista = recursosPorLocal[selLocal.value] || [];
+    caixa.innerHTML = '';
+    if (!selLocal.value) { caixa.innerHTML = '<span class="dica">Escolha um local para ver os recursos.</span>'; return; }
+    if (!lista.length) { caixa.innerHTML = '<span class="dica">Este local não possui recursos cadastrados.</span>'; return; }
+    for (const r of lista) {
+      const label = document.createElement('label');
+      const input = document.createElement('input');
+      input.type = 'checkbox'; input.name = 'recursos'; input.value = r.id;
+      input.checked = marcados.includes(r.id);
+      label.append(input, ' ' + r.nome);
+      caixa.append(label);
+    }
+  }
+  // Ao trocar de local, desmarca o que não existe no novo local
+  selLocal.addEventListener('change', () => { marcados = []; mostrarRecursos(); });
+  mostrarRecursos();
+
+  // Centro de custo preenchido automaticamente pelo curso
+  const selCurso = document.getElementById('curso');
+  const centro = document.getElementById('centro');
+  const atualizarCentro = () => { centro.value = selCurso.selectedOptions[0]?.dataset.cc || ''; };
+  selCurso.addEventListener('change', atualizarCentro);
+  atualizarCentro();
+</script>
+<%- include('partials/rodape') %>

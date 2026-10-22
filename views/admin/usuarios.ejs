@@ -1,0 +1,45 @@
+<%- include('../partials/topo') %>
+<h1>Usuários</h1>
+<div class="duas-colunas">
+  <form method="post" action="/admin/usuarios<%= editando ? '/' + editando.id : '' %>" class="cartao">
+    <h2><%= editando ? 'Editar usuário' : 'Novo usuário' %></h2>
+    <label>Nome completo <input name="nome" value="<%= editando ? editando.nome : '' %>"></label>
+    <label>E-mail (login) <input type="email" name="email" value="<%= editando ? editando.email : '' %>"></label>
+    <label>Senha <%= editando ? '(deixe vazio para manter)' : '' %>
+      <input type="password" name="senha" autocomplete="new-password">
+    </label>
+    <label>Perfil
+      <select name="perfil">
+        <option value="SOLICITANTE">Solicitante</option>
+        <option value="ADMIN" <%= editando && editando.perfil === 'ADMIN' ? 'selected' : '' %>>Administrador</option>
+      </select>
+    </label>
+    <div class="acoes">
+      <button class="botao"><%= editando ? 'Salvar' : 'Cadastrar' %></button>
+      <% if (editando) { %><a href="/admin/usuarios" class="link">Cancelar edição</a><% } %>
+    </div>
+  </form>
+
+  <div class="tabela-scroll">
+  <table>
+    <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Situação</th><th></th></tr></thead>
+    <tbody>
+    <% for (const u of usuarios) { %>
+      <tr class="<%= u.ativo ? '' : 'inativo' %>">
+        <td><%= u.nome %></td>
+        <td><%= u.email %></td>
+        <td><%= u.perfil === 'ADMIN' ? 'Administrador' : 'Solicitante' %></td>
+        <td><%= u.ativo ? 'Ativo' : 'Desativado' %></td>
+        <td class="nowrap">
+          <a href="?editar=<%= u.id %>">Editar</a>
+          <form method="post" action="/admin/usuarios/<%= u.id %>/ativo" class="inline">
+            <button class="link"><%= u.ativo ? 'Desativar' : 'Reativar' %></button>
+          </form>
+        </td>
+      </tr>
+    <% } %>
+    </tbody>
+  </table>
+  </div>
+</div>
+<%- include('../partials/rodape') %>

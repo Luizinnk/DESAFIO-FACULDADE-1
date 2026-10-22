@@ -1,0 +1,33 @@
+<%- include('partials/topo') %>
+<section class="destaque">
+  <h1>Agenda de eventos</h1>
+  <p>Eventos institucionais aprovados de <strong><%= inicio.toLocaleDateString('pt-BR') %></strong>
+     a <strong><%= fim.toLocaleDateString('pt-BR') %></strong>.</p>
+</section>
+
+<% if (!eventos.length) { %>
+  <p class="vazio">Nenhum evento aprovado neste período.</p>
+<% } else { %>
+<div class="tabela-scroll">
+<table>
+  <thead>
+    <tr><th>Data</th><th>Evento</th><th>Tema</th><th>Horário</th><th>Local</th><th>Palestrante</th><th>Realização</th></tr>
+  </thead>
+  <tbody>
+  <% for (const e of eventos) { %>
+    <tr>
+      <td class="nowrap"><%= dataBR(e.data) %></td>
+      <td><strong><%= e.nome %></strong></td>
+      <td><span class="etiqueta"><%= e.tema %></span></td>
+      <td class="nowrap"><%= e.hora_inicio %> – <%= e.hora_fim %></td>
+      <td><%= e.local %></td>
+      <td><%= e.palestrante %></td>
+      <td><%= e.curso %></td>
+    </tr>
+  <% } %>
+  </tbody>
+</table>
+</div>
+<% } %>
+<p class="dica">Quer solicitar um evento? <a href="/login">Entre com seu usuário</a>. Dúvidas: setor de Eventos.</p>
+<%- include('partials/rodape') %>

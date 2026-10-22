@@ -1,0 +1,69 @@
+<%- include('../partials/topo') %>
+<h1>Cadastros</h1>
+<nav class="abas">
+  <% for (const [chave, c] of Object.entries(CADASTROS)) { %>
+    <a href="/admin/cadastros/<%= chave %>" class="<%= chave === tipo ? 'ativo' : '' %>"><%= c.titulo %></a>
+  <% } %>
+</nav>
+
+<div class="duas-colunas">
+  <form method="post" action="/admin/cadastros/<%= tipo %><%= editando ? '/' + editando.id : '' %>" class="cartao">
+    <h2><%= editando ? 'Editar' : 'Novo' %> — <%= cfg.titulo %></h2>
+    <% for (const c of campos) { %>
+      <label><%= c.rotulo %>
+        <% if (c.tipo === 'select') { %>
+          <select name="<%= c.nome %>">
+            <option value="">Selecione…</option>
+            <% for (const o of c.lista) { %>
+              <option value="<%= o.id %>" <%= editando && editando[c.nome] === o.id ? 'selected' : '' %>><%= o.nome %></option>
+            <% } %>
+          </select>
+        <% } else { %>
+          <input name="<%= c.nome %>" value="<%= editando ? editando[c.nome] : '' %>">
+        <% } %>
+      </label>
+    <% } %>
+    <% if (cfg.comRecursos) { %>
+      <fieldset>
+        <legend>Recursos disponíveis neste local</legend>
+        <div class="checks">
+          <% for (const r of todosRecursos) { %>
+            <label><input type="checkbox" name="recursos" value="<%= r.id %>"
+              <%= editando && editando.recursos.includes(r.id) ? 'checked' : '' %>> <%= r.nome %></label>
+          <% } %>
+        </div>
+      </fieldset>
+    <% } %>
+    <div class="acoes">
+      <button class="botao"><%= editando ? 'Salvar' : 'Cadastrar' %></button>
+      <% if (editando) { %><a href="/admin/cadastros/<%= tipo %>" class="link">Cancelar edição</a><% } %>
+    </div>
+  </form>
+
+  <div class="tabela-scroll">
+  <table>
+    <thead><tr>
+      <% for (const c of campos) { %><th><%= c.rotulo %></th><% } %>
+      <% if (cfg.comRecursos) { %><th>Recursos</th><% } %>
+      <th></th>
+    </tr></thead>
+    <tbody>
+    <% for (const item of itens) { %>
+      <tr>
+        <% for (const c of campos) { %><td><%= c.tipo === 'select' ? item[c.nome + '_nome'] : item[c.nome] %></td><% } %>
+        <% if (cfg.comRecursos) { %><td><%= item.recursos_nomes || '—' %></td><% } %>
+        <td class="nowrap">
+          <a href="?editar=<%= item.id %>">Editar</a>
+          <form method="post" action="/admin/cadastros/<%= tipo %>/<%= item.id %>/excluir" class="inline"
+                onsubmit="return confirm('Excluir este cadastro?')">
+            <button class="link perigo">Excluir</button>
+          </form>
+        </td>
+      </tr>
+    <% } %>
+    </tbody>
+  </table>
+  </div>
+</div>
+<p class="dica">A exclusão só é permitida quando o cadastro não está vinculado a eventos ou a outros cadastros.</p>
+<%- include('../partials/rodape') %>
