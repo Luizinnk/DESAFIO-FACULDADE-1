@@ -16,7 +16,7 @@ public record EventoForm(
         @JsonFormat(pattern = "HH:mm") LocalTime horaInicio,
         @JsonFormat(pattern = "HH:mm") LocalTime horaFim,
         Long localId, Long cursoId,
-        String solicitante, String palestrante, String publicoAlvo,
+        String solicitante, String palestrante, String publicoAlvo, Integer publicoEstimado,
         String justificativa, String objetivo,
         Boolean cerimonial, Boolean inscricoes, Boolean declaracoes,
         String observacoes, List<Long> recursoIds) {
@@ -25,13 +25,13 @@ public record EventoForm(
 
     /** Monta o formulário a partir de um evento salvo (usado para revalidar na aprovação). */
     public static EventoForm de(Evento e) {
-        return new EventoForm(e.getNome(), id(e.getTema()), e.getData(), e.getHoraInicio(), e.getHoraFim(),
+        return new EventoForm(e.getNome(), e.getTema() == null ? null : e.getTema().getId(),
+                e.getData(), e.getHoraInicio(), e.getHoraFim(),
                 e.getLocal() == null ? null : e.getLocal().getId(),
                 e.getCurso() == null ? null : e.getCurso().getId(),
-                e.getSolicitante(), e.getPalestrante(), e.getPublicoAlvo(), e.getJustificativa(), e.getObjetivo(),
+                e.getSolicitante(), e.getPalestrante(), e.getPublicoAlvo(), e.getPublicoEstimado(),
+                e.getJustificativa(), e.getObjetivo(),
                 e.getCerimonial(), e.getInscricoes(), e.getDeclaracoes(), e.getObservacoes(),
                 e.getRecursos().stream().map(Recurso::getId).toList());
     }
-
-    private static Long id(br.univille.agendauni.model.Tema t) { return t == null ? null : t.getId(); }
 }

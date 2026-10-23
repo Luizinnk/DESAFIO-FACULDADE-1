@@ -3,6 +3,7 @@ import { NavLink, useParams } from 'react-router-dom';
 import { api } from '../../api.js';
 import { useAvisos } from '../../components/Avisos.jsx';
 import Confirmar from '../../components/Confirmar.jsx';
+import Campo from '../../components/Campo.jsx';
 import Icone from '../../components/Icone.jsx';
 import { CaixaErros, Carregando, TituloPagina } from '../../components/Comuns.jsx';
 
@@ -15,7 +16,7 @@ const TIPOS = {
   'centros-custo': { titulo: 'Centros de custo', singular: 'centro de custo', codigo: true },
 };
 
-const NOVO = { id: null, nome: '', codigo: '', centroCustoId: '', recursoIds: [] };
+const NOVO = { id: null, nome: '', codigo: '', centroCustoId: '', recursoIds: [], capacidade: '' };
 
 /** TELA 7 — Cadastros auxiliares usados no formulário de pedido. */
 export default function Cadastros() {
@@ -45,7 +46,7 @@ export default function Cadastros() {
     e.preventDefault();
     setErros([]);
     try {
-      const corpo = { ...form, centroCustoId: form.centroCustoId ? Number(form.centroCustoId) : null };
+      const corpo = { ...form, centroCustoId: form.centroCustoId ? Number(form.centroCustoId) : null, capacidade: form.capacidade ? Number(form.capacidade) : null };
       await api(form.id ? `/admin/cadastros/${tipo}/${form.id}` : `/admin/cadastros/${tipo}`,
         { metodo: form.id ? 'PUT' : 'POST', corpo });
       avisar(form.id ? 'Alterações salvas.' : `${cfg.singular[0].toUpperCase() + cfg.singular.slice(1)} cadastrado.`);
@@ -68,7 +69,7 @@ export default function Cadastros() {
     }
   }
 
-  const editar = (i) => setForm({ ...NOVO, ...i, codigo: i.codigo || '', centroCustoId: i.centroCustoId || '', recursoIds: i.recursoIds || [] });
+  const editar = (i) => setForm({ ...NOVO, ...i, codigo: i.codigo || '', centroCustoId: i.centroCustoId || '', recursoIds: i.recursoIds || [], capacidade: i.capacidade || '' });
   const marcar = (id) => setForm({ ...form, recursoIds: form.recursoIds.includes(id) ? form.recursoIds.filter((r) => r !== id) : [...form.recursoIds, id] });
 
   return (
@@ -85,23 +86,28 @@ export default function Cadastros() {
           <h2 className="titulo-cartao">{form.id ? `Editar ${cfg.singular}` : `Novo ${cfg.singular}`}</h2>
           <CaixaErros erros={erros} />
           {cfg.codigo && (
-            <label className="campo"><span>Código</span>
+            <Campo rotulo="Código">
               <input value={form.codigo} onChange={(e) => setForm({ ...form, codigo: e.target.value })} placeholder="Ex.: CC-404" />
-            </label>
+            </Campo>
           )}
-          <label className="campo"><span>Nome</span>
+          <Campo rotulo="Nome">
             <input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} />
-          </label>
+          </Campo>
           {cfg.centro && (
-            <label className="campo"><span>Centro de custo</span>
+            <Campo rotulo="Centro de custo">
               <select value={form.centroCustoId} onChange={(e) => setForm({ ...form, centroCustoId: e.target.value })}>
                 <option value="">Escolha…</option>
                 {apoio.centros.map((c) => <option key={c.id} value={c.id}>{c.codigo} - {c.nome}</option>)}
               </select>
-            </label>
+            </Campo>
           )}
           {cfg.recursos && (
-            <div className="campo"><span>Recursos que este local oferece</span>
+            <Campo rotulo="Capacidade (pessoas)" opcional ajuda="Usada para avisar quando o público estimado não cabe.">
+              <input type="number" min="1" inputMode="numeric" value={form.capacidade} onChange={(e) => setForm({ ...form, capacidade: e.target.value })} />
+            </Campo>
+          )}
+          {cfg.recursos && (
+            <div className="campo"><span className="rotulo">Recursos que este local oferece</span>
               <div className="opcoes-marcar">
                 {apoio.recursos.map((r) => (
                   <label key={r.id} className={`chip ${form.recursoIds.includes(r.id) ? 'marcado' : ''}`}>
@@ -127,7 +133,7 @@ export default function Cadastros() {
                 <div>
                   <strong>{cfg.codigo ? `${i.codigo} - ${i.nome}` : i.nome}</strong>
                   {i.centroCusto && <small>{i.centroCusto}</small>}
-                  {cfg.recursos && <small>{i.recursos || 'Sem recursos'}</small>}
+                  {cfg.recursos && <small>{i.capacidade ? `${i.capacidade} lugares · ` : ''}{i.recursos || 'Sem recursos'}</small>}
                 </div>
                 <div className="acoes-linha">
                   <button className="botao-icone" onClick={() => editar(i)} aria-label={`Editar ${i.nome}`} title="Editar"><Icone nome="lapis" /></button>

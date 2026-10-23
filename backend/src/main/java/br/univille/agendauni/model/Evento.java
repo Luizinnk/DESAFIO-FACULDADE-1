@@ -31,6 +31,7 @@ public class Evento {
     @ManyToOne private Curso curso;
     private String palestrante;
     private String publicoAlvo;
+    private Integer publicoEstimado;
     private String justificativa;
     private String objetivo;
     private Boolean cerimonial;

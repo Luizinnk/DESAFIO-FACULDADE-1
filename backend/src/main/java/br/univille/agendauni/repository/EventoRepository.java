@@ -20,6 +20,13 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
 
     List<Evento> findByStatusAndDataBetweenOrderByDataAscHoraInicioAsc(Status status, LocalDate inicio, LocalDate fim);
 
+    List<Evento> findByStatusInAndDataBetweenOrderByDataAscHoraInicioAsc(List<Status> status, LocalDate inicio, LocalDate fim);
+
+    /** Eventos aprovados e pendentes de um local num dia (para mostrar a ocupação). */
+    List<Evento> findByLocalIdAndDataAndStatusInOrderByHoraInicio(Long localId, LocalDate data, List<Status> status);
+
+    long countByStatus(Status status);
+
     /**
      * REGRA DE CONFLITO: evento APROVADO, mesmo local, mesma data e horários sobrepostos.
      * Dois intervalos se sobrepõem quando: inicioExistente < fimNovo E fimExistente > inicioNovo.

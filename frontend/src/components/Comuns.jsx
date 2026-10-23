@@ -11,6 +11,19 @@ export function Carregando() {
   return <div className="carregando" aria-busy="true"><span className="girando" /> Carregando…</div>;
 }
 
+/** Cartões "fantasma" enquanto a lista carrega (evita a tela vazia). */
+export function Esqueleto({ quantidade = 3 }) {
+  return (
+    <div className="lista-pedidos" aria-busy="true" aria-label="Carregando">
+      {Array.from({ length: quantidade }, (_, i) => (
+        <div key={i} className="esqueleto">
+          <span className="linha curta" /><span className="linha" /><span className="linha media" /><span className="linha media" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /** Tela vazia com uma mensagem amigável e, opcionalmente, um botão de ação. */
 export function Vazio({ titulo, texto, acao, para }) {
   return (

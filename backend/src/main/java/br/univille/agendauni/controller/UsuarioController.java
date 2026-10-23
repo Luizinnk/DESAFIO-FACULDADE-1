@@ -62,13 +62,20 @@ public class UsuarioController {
         }
         if (novo && (f.senha() == null || f.senha().isBlank())) throw new RegraNegocioException("Defina uma senha.");
         if (f.senha() != null && !f.senha().isBlank()) {
-            if (f.senha().length() < 6) throw new RegraNegocioException("A senha precisa ter pelo menos 6 caracteres.");
+            validarSenha(f.senha());
             u.setSenhaHash(encoder.encode(f.senha()));   // senha só muda se uma nova for digitada
         }
         u.setNome(f.nome().trim());
         u.setEmail(f.email().trim().toLowerCase());
         u.setPerfil("ADMIN".equals(f.perfil()) ? Perfil.ADMIN : Perfil.SOLICITANTE);
         return usuarios.saveAndFlush(u);
+    }
+
+    /** Senha forte o suficiente: 8+ caracteres, com letra e número. */
+    static void validarSenha(String senha) {
+        if (senha == null || senha.length() < 8 || !senha.matches(".*[A-Za-z].*") || !senha.matches(".*\\d.*")) {
+            throw new RegraNegocioException("A senha precisa ter pelo menos 8 caracteres, com letras e números.");
+        }
     }
 
     private Usuario buscar(Long id) {

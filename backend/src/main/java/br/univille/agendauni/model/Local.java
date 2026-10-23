@@ -15,6 +15,7 @@ public class Local {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nome;
+    private Integer capacidade;   // opcional: quantas pessoas cabem
 
     @ManyToMany
     @JoinTable(name = "local_recursos",

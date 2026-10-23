@@ -79,3 +79,37 @@ CREATE TABLE IF NOT EXISTS evento_recursos (
 
 -- Índice que acelera a busca de conflito de agenda (local + data)
 CREATE INDEX IF NOT EXISTS idx_eventos_local_data ON eventos (local_id, data);
+
+-- ===== Melhorias da auditoria de UX =====
+
+-- Capacidade do local e público estimado do evento (o envio confere se cabe)
+ALTER TABLE locais  ADD COLUMN IF NOT EXISTS capacidade INTEGER;
+ALTER TABLE eventos ADD COLUMN IF NOT EXISTS publico_estimado INTEGER;
+
+-- Histórico de cada solicitação: quem fez o quê e quando (linha do tempo no detalhe)
+CREATE TABLE IF NOT EXISTS evento_historico (
+  id           BIGSERIAL PRIMARY KEY,
+  evento_id    BIGINT NOT NULL REFERENCES eventos(id) ON DELETE CASCADE,
+  acao         VARCHAR(30)  NOT NULL,   -- CRIADO, ENVIADO, APROVADO, REJEITADO, EDITADO, CANCELADO...
+  detalhe      TEXT,
+  usuario_nome VARCHAR(120) NOT NULL,
+  data_hora    TIMESTAMP    NOT NULL DEFAULT now()
+);
+
+-- Imagem (arte/cartaz) opcional do evento, guardada no próprio banco
+CREATE TABLE IF NOT EXISTS evento_imagens (
+  evento_id     BIGINT PRIMARY KEY REFERENCES eventos(id) ON DELETE CASCADE,
+  tipo          VARCHAR(50) NOT NULL,   -- image/png, image/jpeg, image/webp
+  dados         BYTEA       NOT NULL,
+  atualizado_em TIMESTAMP   NOT NULL DEFAULT now()
+);
+
+-- Bloqueio de local por período (manutenção, provas): impede pedidos nesses dias
+CREATE TABLE IF NOT EXISTS bloqueios (
+  id          BIGSERIAL PRIMARY KEY,
+  local_id    BIGINT NOT NULL REFERENCES locais(id),
+  data_inicio DATE   NOT NULL,
+  data_fim    DATE   NOT NULL,
+  motivo      VARCHAR(200) NOT NULL,
+  CHECK (data_fim >= data_inicio)
+);

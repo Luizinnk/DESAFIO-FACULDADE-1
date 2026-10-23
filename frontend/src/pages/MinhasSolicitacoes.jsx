@@ -2,17 +2,30 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api.js';
 import Icone from '../components/Icone.jsx';
-import { Carregando, SeloStatus, TituloPagina, Vazio } from '../components/Comuns.jsx';
+import { Esqueleto, SeloStatus, TituloPagina, Vazio } from '../components/Comuns.jsx';
 import { STATUS, dataBR, horario } from '../util.js';
+
+const ABAS = [
+  { chave: '', texto: 'Todos' },
+  { chave: 'RASCUNHO', texto: 'Rascunhos' },
+  { chave: 'AGUARDANDO', texto: 'Em análise' },
+  { chave: 'APROVADO', texto: 'Aprovados' },
+  { chave: 'REJEITADO', texto: 'Rejeitados' },
+  { chave: 'CANCELADO', texto: 'Cancelados' },
+];
 
 /** TELA 3 — Meus pedidos: o solicitante acompanha as próprias solicitações. */
 export default function MinhasSolicitacoes() {
   const [lista, setLista] = useState(null);
   const [erro, setErro] = useState('');
+  const [aba, setAba] = useState('');
 
   useEffect(() => {
     api('/solicitacoes').then(setLista).catch((e) => setErro(e.message));
   }, []);
+
+  const conta = (chave) => (lista || []).filter((e) => !chave || e.status === chave).length;
+  const visiveis = (lista || []).filter((e) => !aba || e.status === aba);
 
   return (
     <>
@@ -20,15 +33,25 @@ export default function MinhasSolicitacoes() {
         <Link to="/solicitacoes/nova" className="botao botao-primario"><Icone nome="mais" /> Novo pedido</Link>
       </TituloPagina>
 
+      {lista?.length > 0 && (
+        <nav className="abas" aria-label="Filtrar pedidos">
+          {ABAS.filter((a) => !a.chave || conta(a.chave) > 0).map((a) => (
+            <button key={a.chave} className={aba === a.chave ? 'ativa' : ''} onClick={() => setAba(a.chave)} aria-pressed={aba === a.chave}>
+              {a.texto} <span className="aba-numero">{conta(a.chave)}</span>
+            </button>
+          ))}
+        </nav>
+      )}
+
       {erro && <div className="caixa-erros">{erro}</div>}
-      {!lista && !erro && <Carregando />}
+      {!lista && !erro && <Esqueleto />}
       {lista?.length === 0 && (
         <Vazio titulo="Você ainda não fez nenhum pedido" texto="Comece pedindo o seu primeiro evento."
           acao="Fazer meu primeiro pedido" para="/solicitacoes/nova" />
       )}
 
       <div className="lista-pedidos">
-        {lista?.map((e) => (
+        {visiveis.map((e) => (
           <Link key={e.id} to={`/solicitacoes/${e.id}`} className="cartao-pedido">
             <div className="pedido-topo">
               <SeloStatus status={e.status} />

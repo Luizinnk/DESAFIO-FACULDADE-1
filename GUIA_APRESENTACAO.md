@@ -11,11 +11,11 @@
 | Tempo | O que mostrar | O que falar |
 |---|---|---|
 | 0:00–0:30 | Agenda pública | "Visitante sem login vê só eventos aprovados, do mês atual mais dois, em ordem de data." |
-| 0:30–1:45 | Entrar como **carlos@teste.com** → Meus pedidos → "Bate-papo com egressos" → Editar pedido → **Enviar** | Aparece o **conflito** (19:30 bate com 19:00–20:00 no Auditório A). Mudar "Começa às" para **20:00** → Enviar → aceito. "Encostar no horário pode, sobrepor não." |
-| 1:45–2:45 | Entrar como **admin@teste.com** → Solicitações → abrir o pedido → **Aprovar** → confirmar | "Na aprovação o sistema checa o conflito de novo." Abrir a Agenda: o evento apareceu. |
+| 0:30–1:45 | Entrar como **carlos@teste.com** → Meus pedidos → "Bate-papo com egressos" → Editar pedido | Na etapa 2 o sistema **já avisa em vermelho** que 19:30 bate com 19:00–20:00 no Auditório A, antes de enviar. Tocar no horário livre **20:00–23:00** → "Horário livre" → anexar uma arte → **Enviar**. |
+| 1:45–2:45 | Entrar como **admin@teste.com** → cai no **Painel** → Solicitações → abrir o pedido (ocupação da sala ao lado) → **Aprovar** | "Na aprovação o sistema checa o conflito de novo e trava o local." Abrir a Agenda: o evento apareceu com a arte; clicar mostra a página pública com "Adicionar ao calendário". |
 | 2:45–3:15 | Abrir "Congresso de Mecânica" → Rejeitar → tentar sem motivo → com motivo | "O motivo é obrigatório e o solicitante vê; ele pode corrigir e reenviar." |
 | 3:15–4:00 | **Persistência**: Cadastros → Temas → criar "Mesa redonda" → **F5** → continua → tentar excluir "Palestra" | "Está no PostgreSQL. E o próprio banco recusa excluir tema em uso (chave estrangeira)." |
-| 4:00–4:40 | Relatório → filtrar por curso → **Exportar CSV** | "Filtros combináveis; o CSV usa a mesma consulta." |
+| 4:00–4:40 | **Ocupação** (grade do dia por sala, bloqueio do Laboratório 5) → Relatório → filtrar → **Exportar CSV** | "Bloqueio impede pedidos na manutenção. Filtros combináveis; o CSV usa a mesma consulta." |
 | 4:40–5:00 | Mostrar no celular (ou reduzir a janela) | "Pensado para qualquer pessoa: botões grandes, menu embaixo como em aplicativo, linguagem simples." |
 
 ---
@@ -84,6 +84,23 @@ Consultas com parâmetros nomeados (`:localId`) via JPA. Nenhum valor digitado �
 Menu inferior no celular, botões grandes, formulário em 4 passos com contador do que falta, campos em vermelho,
 frase explicando cada status, confirmação antes de ações sem volta.
 
+**O que mudou depois da auditoria de UX?**
+Aviso de conflito antes do envio (`GET /api/disponibilidade` + componente `Disponibilidade.jsx`), validação na hora,
+painel e grade de ocupação para o admin, bloqueio de sala, capacidade, histórico (`evento_historico`), troca de senha,
+arte do evento (`evento_imagens`, BYTEA no PostgreSQL), página pública com .ics e acessibilidade (`Campo.jsx`).
+
+**Por que não tem recuperação de senha por e-mail?**
+O caderno diz que não é obrigatória e ela exige um servidor de e-mail. Em troca, cada usuário troca a própria senha
+e o admin pode redefinir; a regra de senha ficou mais forte (8+ com letras e números).
+
+**Como evitam que dois admins aprovem horários conflitantes ao mesmo tempo?**
+`LocalRepository.travar` faz `SELECT ... FOR UPDATE` na linha do local dentro da transação de aprovação.
+O segundo admin espera o primeiro terminar e então vê o conflito.
+
+**Onde fica a imagem?**
+Na tabela `evento_imagens` (BYTEA), separada de `eventos` para não carregar bytes à toa. `ImagemService` aceita só
+JPG/PNG/WEBP até 5 MB. Antes da aprovação só o autor e o admin conseguem ver a imagem.
+
 **Usaram IA?**
 Sim, declarado no README (o regulamento permite com transparência). Seja honesto aqui.
 
@@ -105,3 +122,8 @@ Sim, declarado no README (o regulamento permite com transparência). Seja honest
 | Relatório e CSV | `controller/RelatorioController.java` + `pages/admin/Relatorio.jsx` |
 | Dados fictícios | `service/DadosIniciais.java` |
 | Visual e celular | `frontend/src/styles.css`, `components/Cabecalho.jsx` |
+| Disponibilidade antes do envio | `controller/OcupacaoController.java` + `components/Disponibilidade.jsx` |
+| Painel e grade de ocupação | `OcupacaoController.java` + `pages/admin/Painel.jsx`, `pages/admin/Ocupacao.jsx` |
+| Arte do evento | `service/ImagemService.java` + etapa "Arte do evento" em `FormularioEvento.jsx` |
+| Página pública do evento | `PublicoController.java` + `pages/EventoPublico.jsx` |
+| Histórico | `EventoService.registrar` + tabela `evento_historico` |

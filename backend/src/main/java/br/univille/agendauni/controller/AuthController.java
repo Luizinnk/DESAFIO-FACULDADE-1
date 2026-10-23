@@ -52,6 +52,24 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+    record TrocaSenha(String senhaAtual, String novaSenha) {}
+
+    /** Qualquer usuário logado troca a própria senha (sem depender do administrador). */
+    @PutMapping("/senha")
+    public ResponseEntity<Void> trocarSenha(@RequestBody TrocaSenha dados, HttpServletRequest req) {
+        HttpSession s = req.getSession(false);
+        UsuarioSessao sessao = s == null ? null : (UsuarioSessao) s.getAttribute(UsuarioSessao.ATRIBUTO);
+        if (sessao == null) return ResponseEntity.status(401).build();
+        Usuario u = usuarios.findById(sessao.id()).orElseThrow();
+        if (dados.senhaAtual() == null || !encoder.matches(dados.senhaAtual(), u.getSenhaHash())) {
+            throw new RegraNegocioException("A senha atual está incorreta.");
+        }
+        UsuarioController.validarSenha(dados.novaSenha());
+        u.setSenhaHash(encoder.encode(dados.novaSenha()));
+        usuarios.save(u);
+        return ResponseEntity.noContent().build();
+    }
+
     /** Quem está logado agora (o front chama ao abrir a página). */
     @GetMapping("/eu")
     public Map<String, Object> eu(HttpServletRequest req) {

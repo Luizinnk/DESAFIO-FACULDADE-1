@@ -3,11 +3,34 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAvisos } from '../components/Avisos.jsx';
 import Confirmar from '../components/Confirmar.jsx';
+import Disponibilidade from '../components/Disponibilidade.jsx';
 import Icone from '../components/Icone.jsx';
 import { CaixaErros, Carregando, SeloStatus, TituloPagina } from '../components/Comuns.jsx';
-import { STATUS, dataBR, horario, simNao } from '../util.js';
+import { ACOES, dataBR, horario, simNao } from '../util.js';
 
 const EDITAVEIS = ['RASCUNHO', 'AGUARDANDO', 'REJEITADO'];
+const MOTIVOS_RAPIDOS = ['Local indisponível nesta data', 'Fora do prazo para organização', 'Dados incompletos', 'Conflito com outro evento'];
+
+/** Frase do status, escrita para quem está olhando (solicitante ou administrador). */
+function fraseStatus(ev, admin) {
+  const ultimo = [...(ev.historico || [])].reverse().find((h) => h.acao === ev.status);
+  const quando = ultimo ? ` em ${ultimo.dataHora.split(' às')[0]}` : '';
+  if (admin) {
+    return {
+      AGUARDANDO: 'Este pedido espera a sua análise. Confira a ocupação do local antes de aprovar.',
+      APROVADO: `Aprovado${quando} e publicado na agenda pública.`,
+      REJEITADO: `Rejeitado${quando}. Aguardando correção do solicitante.`,
+      CANCELADO: `Cancelado${quando}. Não aparece na agenda pública.`,
+    }[ev.status];
+  }
+  return {
+    RASCUNHO: 'Ainda não foi enviado. Só você consegue ver.',
+    AGUARDANDO: 'Enviado. O setor de Eventos vai analisar e você verá o resultado aqui.',
+    APROVADO: `Confirmado${quando} e publicado na agenda.`,
+    REJEITADO: 'O setor de Eventos pediu ajustes. Veja o motivo, corrija e envie de novo.',
+    CANCELADO: 'Este pedido foi cancelado. O registro fica guardado no histórico.',
+  }[ev.status];
+}
 
 /** TELA 5 — Detalhe da solicitação, com as ações permitidas para cada perfil e status. */
 export default function DetalheEvento({ modo }) {
@@ -31,11 +54,10 @@ export default function DetalheEvento({ modo }) {
       .catch((e) => setErros([e.message]));
   }, [id, admin]);
 
-  useEffect(carregar, [carregar]);
+  useEffect(() => { carregar(); }, [carregar]);
 
   if (!ev) return erros.length ? <CaixaErros erros={erros} /> : <Carregando />;
 
-  // Executa a ação confirmada na janela e mostra o resultado
   async function executar() {
     const acao = dialogo;
     setDialogo(null);
@@ -67,6 +89,8 @@ export default function DetalheEvento({ modo }) {
     }
   }
 
+  const rejeitado = ev.status === 'REJEITADO';
+
   return (
     <>
       <TituloPagina titulo={ev.nome} voltar={admin ? `/admin/solicitacoes?status=${ev.status}` : '/minhas'}>
@@ -75,59 +99,89 @@ export default function DetalheEvento({ modo }) {
 
       <CaixaErros erros={erros} />
 
-      {/* Explica em palavras simples o que significa o status atual */}
-      <div className={`faixa-status faixa-${ev.status}`}>
-        <Icone nome="info" />
-        <span><strong>{STATUS[ev.status].texto}.</strong> {STATUS[ev.status].explicacao}</span>
+      {/* Um único aviso por status. Na rejeição, o motivo e a ação ficam juntos. */}
+      <div className={`alerta-card alerta-card-${ev.status}`}>
+        <Icone nome={rejeitado ? 'alerta' : 'info'} />
+        <div>
+          <strong>{fraseStatus(ev, admin)}</strong>
+          {rejeitado && ev.motivoRejeicao && <p className="motivo">Motivo: {ev.motivoRejeicao}</p>}
+          {rejeitado && !admin && (
+            <Link to={`/solicitacoes/${id}/editar`} className="botao botao-primario botao-pequeno"><Icone nome="lapis" /> Corrigir e reenviar</Link>
+          )}
+        </div>
       </div>
 
-      {ev.status === 'REJEITADO' && ev.motivoRejeicao && (
-        <div className="caixa-motivo"><Icone nome="info" /><div><strong>Motivo da rejeição</strong><p>{ev.motivoRejeicao}</p></div></div>
-      )}
       {conflito && (
-        <div className="caixa-erros"><Icone nome="alerta" />
-          <div><strong>Atenção: conflito de agenda</strong><p>O local já tem o evento aprovado {conflito}. A aprovação será bloqueada.</p></div>
+        <div className="alerta-card alerta-card-REJEITADO"><Icone nome="alerta" />
+          <div><strong>Conflito de agenda</strong><p>O local já tem o evento aprovado {conflito}. A aprovação será bloqueada.</p></div>
         </div>
       )}
 
       <div className="resumo-evento">
         <div><Icone nome="agenda" /><span><small>Data</small>{dataBR(ev.data)}</span></div>
-        <div><Icone nome="relogio" /><span><small>Horário</small>{horario(ev.horaInicio, ev.horaFim)}</span></div>
+        <div className="hora"><Icone nome="relogio" /><span><small>Horário</small>{horario(ev.horaInicio, ev.horaFim)}</span></div>
         <div><Icone nome="local" /><span><small>Local</small>{ev.local || '—'}</span></div>
         <div><Icone nome="lista" /><span><small>Tema</small>{ev.tema || '—'}</span></div>
       </div>
 
-      <div className="cartao">
-        <section className="bloco-detalhe">
-          <h2>Responsáveis</h2>
-          <dl className="dados">
-            <Dado rotulo="Solicitante" valor={ev.solicitante} />
-            <Dado rotulo="Palestrante" valor={ev.palestrante} />
-            <Dado rotulo="Curso / coordenação" valor={ev.curso} />
-            <Dado rotulo="Centro de custo" valor={ev.centroCusto} />
-          </dl>
-        </section>
-        <section className="bloco-detalhe">
-          <h2>Detalhes</h2>
-          <dl className="dados">
-            <Dado rotulo="Público-alvo" valor={ev.publicoAlvo} largo />
-            <Dado rotulo="Justificativa" valor={ev.justificativa} largo />
-            <Dado rotulo="Objetivo" valor={ev.objetivo} largo />
-            <Dado rotulo="Cerimonial" valor={simNao(ev.cerimonial)} />
-            <Dado rotulo="Inscrições" valor={simNao(ev.inscricoes)} />
-            <Dado rotulo="Declarações" valor={simNao(ev.declaracoes)} />
-            <Dado rotulo="Recursos" valor={ev.recursos.join(', ')} />
-            {ev.observacoes && <Dado rotulo="Observações" valor={ev.observacoes} largo />}
-          </dl>
-        </section>
-        <p className="rodape-cartao">Registrado por {ev.autor} · última alteração em {ev.atualizadoEm}</p>
+      <div className={admin && ev.status === 'AGUARDANDO' ? 'detalhe-com-lateral' : ''}>
+        <div>
+          <div className="cartao">
+            {ev.imagem && <img className="detalhe-imagem" src={ev.imagem} alt={`Arte do evento ${ev.nome}`} />}
+            <section className="bloco-detalhe">
+              <h2>Responsáveis</h2>
+              <dl className="dados">
+                <Dado rotulo="Responsável pelo evento" valor={ev.solicitante} />
+                <Dado rotulo="Palestrante" valor={ev.palestrante} />
+                <Dado rotulo="Curso / coordenação" valor={ev.curso} />
+                <Dado rotulo="Centro de custo" valor={ev.centroCusto} />
+              </dl>
+            </section>
+            <section className="bloco-detalhe">
+              <h2>Detalhes</h2>
+              <dl className="dados">
+                <Dado rotulo="Público-alvo" valor={ev.publicoAlvo} largo />
+                <Dado rotulo="Público estimado" valor={ev.publicoEstimado
+                  ? `${ev.publicoEstimado} pessoas${ev.capacidadeLocal ? ` (local comporta ${ev.capacidadeLocal})` : ''}` : null} />
+                <Dado rotulo="Recursos" valor={ev.recursos.join(', ')} />
+                <Dado rotulo="Justificativa" valor={ev.justificativa} largo />
+                <Dado rotulo="Objetivo" valor={ev.objetivo} largo />
+                <Dado rotulo="Cerimonial" valor={simNao(ev.cerimonial)} />
+                <Dado rotulo="Inscrições" valor={simNao(ev.inscricoes)} />
+                <Dado rotulo="Declarações" valor={simNao(ev.declaracoes)} />
+                {ev.observacoes && <Dado rotulo="Observações" valor={ev.observacoes} largo />}
+              </dl>
+            </section>
+          </div>
+
+          {ev.historico?.length > 0 && (
+            <section className="cartao">
+              <h2 className="titulo-cartao">Histórico</h2>
+              <ol className="linha-tempo">
+                {ev.historico.map((h, i) => (
+                  <li key={i} className={`acao-${h.acao}`}>
+                    <strong>{ACOES[h.acao] || h.acao}</strong>
+                    <span>{h.dataHora} · por {h.usuario}</span>
+                    {h.detalhe && <p>{h.detalhe}</p>}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+        </div>
+
+        {/* Para o admin decidir com segurança: a ocupação do local naquele dia */}
+        {admin && ev.status === 'AGUARDANDO' && (
+          <aside className="cartao lateral">
+            <h2 className="titulo-cartao">Ocupação do local no dia</h2>
+            <Disponibilidade localId={ev.localId} data={ev.data} inicio={ev.horaInicio} fim={ev.horaFim} ignorarId={ev.id} />
+          </aside>
+        )}
       </div>
 
       <div className="acoes-detalhe">
-        {!admin && EDITAVEIS.includes(ev.status) && (
-          <Link to={`/solicitacoes/${id}/editar`} className="botao botao-primario">
-            <Icone nome="lapis" /> {ev.status === 'REJEITADO' ? 'Corrigir e reenviar' : 'Editar pedido'}
-          </Link>
+        {!admin && EDITAVEIS.includes(ev.status) && !rejeitado && (
+          <Link to={`/solicitacoes/${id}/editar`} className="botao botao-primario"><Icone nome="lapis" /> Editar pedido</Link>
         )}
         {!admin && ev.status === 'RASCUNHO' && (
           <button className="botao botao-perigo-leve" onClick={() => setDialogo('excluir')}><Icone nome="lixo" /> Excluir rascunho</button>
@@ -145,6 +199,7 @@ export default function DetalheEvento({ modo }) {
         {admin && ev.status === 'APROVADO' && (
           <>
             <Link to={`/admin/solicitacoes/${id}/editar`} className="botao botao-primario"><Icone nome="lapis" /> Editar evento</Link>
+            <Link to={`/eventos/${id}`} className="botao botao-secundario"><Icone nome="compartilhar" /> Ver página pública</Link>
             <button className="botao botao-perigo-leve" onClick={() => setDialogo('cancelar')}><Icone nome="x" /> Cancelar evento</button>
           </>
         )}
@@ -160,11 +215,17 @@ export default function DetalheEvento({ modo }) {
         aoConfirmar={executar} aoFechar={() => setDialogo(null)} />
       <Confirmar aberto={dialogo === 'rejeitar'} titulo="Rejeitar este pedido" perigo textoConfirmar="Rejeitar pedido"
         aoConfirmar={executar} aoFechar={() => setDialogo(null)}>
-        <label className="campo">
-          <span>Motivo (o solicitante vai ver) <em className="obrigatorio">*</em></span>
-          <textarea rows={3} value={motivo} onChange={(e) => setMotivo(e.target.value)} autoFocus
+        <p className="texto-apoio">Escolha um motivo rápido ou escreva o seu. O solicitante vai ver este texto.</p>
+        <div className="opcoes-marcar motivos-rapidos">
+          {MOTIVOS_RAPIDOS.map((m) => (
+            <button key={m} type="button" className={`chip ${motivo === m ? 'marcado' : ''}`} onClick={() => setMotivo(m)}>{m}</button>
+          ))}
+        </div>
+        <div className="campo">
+          <label htmlFor="motivo-rejeicao">Motivo <em className="obrigatorio" aria-hidden="true">*</em></label>
+          <textarea id="motivo-rejeicao" rows={3} value={motivo} onChange={(e) => setMotivo(e.target.value)}
             placeholder="Ex.: O auditório estará em manutenção. Escolha outra data." />
-        </label>
+        </div>
       </Confirmar>
     </>
   );

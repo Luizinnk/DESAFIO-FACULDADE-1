@@ -32,13 +32,14 @@ public class RelatorioController {
     public RelatorioController(EntityManager em) { this.em = em; }
 
     /** Monta a consulta só com os filtros que foram preenchidos. */
-    private List<EventoDto> consultar(LocalDate dataInicio, LocalDate dataFim, Long cursoId, Long temaId, Status status) {
+    private List<EventoDto> consultar(LocalDate dataInicio, LocalDate dataFim, Long cursoId, Long temaId, Long localId, Status status) {
         List<String> where = new ArrayList<>(List.of("e.status <> br.univille.agendauni.model.Status.RASCUNHO"));
         Map<String, Object> params = new HashMap<>();
         if (dataInicio != null) { where.add("e.data >= :dataInicio"); params.put("dataInicio", dataInicio); }
         if (dataFim != null) { where.add("e.data <= :dataFim"); params.put("dataFim", dataFim); }
         if (cursoId != null) { where.add("e.curso.id = :cursoId"); params.put("cursoId", cursoId); }
         if (temaId != null) { where.add("e.tema.id = :temaId"); params.put("temaId", temaId); }
+        if (localId != null) { where.add("e.local.id = :localId"); params.put("localId", localId); }
         if (status != null) { where.add("e.status = :status"); params.put("status", status); }
 
         String jpql = "SELECT e FROM Evento e WHERE " + String.join(" AND ", where) + " ORDER BY e.data, e.horaInicio";
@@ -52,8 +53,9 @@ public class RelatorioController {
                                      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
                                      @RequestParam(required = false) Long cursoId,
                                      @RequestParam(required = false) Long temaId,
+                                     @RequestParam(required = false) Long localId,
                                      @RequestParam(required = false) Status status) {
-        return consultar(dataInicio, dataFim, cursoId, temaId, status);
+        return consultar(dataInicio, dataFim, cursoId, temaId, localId, status);
     }
 
     /** Mesmos filtros e mesmos campos da tela. Separador ";" e BOM para abrir certo no Excel. */
@@ -62,11 +64,12 @@ public class RelatorioController {
                                       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
                                       @RequestParam(required = false) Long cursoId,
                                       @RequestParam(required = false) Long temaId,
+                                      @RequestParam(required = false) Long localId,
                                       @RequestParam(required = false) Status status) {
         DateTimeFormatter br = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String cabecalho = linha("Evento", "Data", "Início", "Término", "Tema", "Curso/Coordenação",
                 "Centro de custo", "Local", "Solicitante", "Status");
-        String corpo = consultar(dataInicio, dataFim, cursoId, temaId, status).stream()
+        String corpo = consultar(dataInicio, dataFim, cursoId, temaId, localId, status).stream()
                 .map(e -> linha(e.nome(), e.data().format(br), String.valueOf(e.horaInicio()), String.valueOf(e.horaFim()),
                         e.tema(), e.curso(), e.centroCusto(), e.local(), e.solicitante(), e.status()))
                 .collect(Collectors.joining("\r\n"));

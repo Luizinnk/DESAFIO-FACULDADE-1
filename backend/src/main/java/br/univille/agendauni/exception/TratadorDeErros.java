@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 /** Converte exceções em respostas JSON padronizadas: { "erros": [ ... ] } */
 @RestControllerAdvice
@@ -34,6 +36,16 @@ public class TratadorDeErros {
                 ? "Já existe um cadastro com esse nome, código ou e-mail."
                 : "Operação recusada pelo banco de dados.";
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("erros", List.of(msg)));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ResponseEntity<Map<String, List<String>>> arquivoGrande(MaxUploadSizeExceededException e) {
+        return ResponseEntity.badRequest().body(Map.of("erros", List.of("A imagem deve ter no máximo 5 MB.")));
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    ResponseEntity<Map<String, List<String>>> semArquivo(MissingServletRequestPartException e) {
+        return ResponseEntity.badRequest().body(Map.of("erros", List.of("Escolha uma imagem.")));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

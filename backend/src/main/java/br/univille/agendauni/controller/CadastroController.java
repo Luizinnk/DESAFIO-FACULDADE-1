@@ -41,7 +41,7 @@ public class CadastroController {
     }
 
     /** Campos possíveis; cada tipo usa só os que precisa. */
-    record Form(String nome, String codigo, Long centroCustoId, List<Long> recursoIds) {}
+    record Form(String nome, String codigo, Long centroCustoId, List<Long> recursoIds, Integer capacidade) {}
 
     @GetMapping
     public List<Map<String, Object>> listar(@PathVariable String tipo) {
@@ -65,6 +65,7 @@ public class CadastroController {
                 Map<String, Object> m = linha(l.getId(), l.getNome());
                 m.put("recursoIds", recs.stream().map(Recurso::getId).toList());
                 m.put("recursos", String.join(", ", recs.stream().map(Recurso::getNome).toList()));
+                m.put("capacidade", l.getCapacidade());
                 return m;
             }).toList();
             default -> throw new NaoEncontradoException("Cadastro inexistente.");
@@ -98,6 +99,10 @@ public class CadastroController {
 
     private Map<String, Object> salvar(String tipo, Long id, Form f) {
         String nome = obrigatorio(f.nome(), "Preencha o nome.");
+        // Impede duplicado mesmo com maiúsculas/acentos diferentes ("AUDITORIO A" = "Auditório A")
+        boolean repetido = listar(tipo).stream().anyMatch(m -> !((Long) m.get("id")).equals(id)
+                && normalizar((String) m.get("nome")).equals(normalizar(nome)));
+        if (repetido) throw new RegraNegocioException("Já existe um cadastro chamado \"" + nome + "\" (mesmo com acento ou maiúsculas diferentes).");
         switch (tipo) {
             case "temas" -> {
                 Tema t = id == null ? new Tema() : temas.findById(id).orElseThrow(this::naoEncontrado);
@@ -125,12 +130,20 @@ public class CadastroController {
             case "locais" -> {
                 Local l = id == null ? new Local() : locais.findById(id).orElseThrow(this::naoEncontrado);
                 l.setNome(nome);
+                if (f.capacidade() != null && f.capacidade() < 1) throw new RegraNegocioException("A capacidade deve ser maior que zero.");
+                l.setCapacidade(f.capacidade());
                 l.setRecursos(new HashSet<>(recursos.findAllById(f.recursoIds() == null ? List.of() : f.recursoIds())));
                 locais.saveAndFlush(l);
             }
             default -> throw new NaoEncontradoException("Cadastro inexistente.");
         }
         return Map.of("ok", true);
+    }
+
+    /** "Auditório  A" -> "auditorio a": sem acento, minúsculo e sem espaços repetidos. */
+    static String normalizar(String texto) {
+        return java.text.Normalizer.normalize(texto, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "").toLowerCase().trim().replaceAll("\\s+", " ");
     }
 
     private static Map<String, Object> linha(Long id, String nome) {

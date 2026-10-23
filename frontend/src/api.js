@@ -17,3 +17,16 @@ export async function api(caminho, { metodo = 'GET', corpo } = {}) {
   }
   return dados;
 }
+
+/** Envia um arquivo (multipart) para a API, ex.: a arte do evento. */
+export async function enviarArquivo(caminho, arquivo) {
+  const dados = new FormData();
+  dados.append('arquivo', arquivo);
+  const resposta = await fetch(`/api${caminho}`, { method: 'POST', body: dados, credentials: 'same-origin' });
+  if (!resposta.ok) {
+    const corpo = await resposta.json().catch(() => null);
+    const erro = new Error(corpo?.erros?.join(' ') || 'Não foi possível enviar a imagem.');
+    erro.erros = corpo?.erros || [erro.message];
+    throw erro;
+  }
+}
