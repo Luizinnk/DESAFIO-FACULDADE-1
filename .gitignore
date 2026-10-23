@@ -6,3 +6,6 @@ backend/target/
 # Sistema
 .DS_Store
 .env
+
+# Acesso pessoal de teste (nunca vai para o GitHub)
+ACESSO_LOCAL.txt
