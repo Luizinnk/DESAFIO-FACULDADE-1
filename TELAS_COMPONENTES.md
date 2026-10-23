@@ -160,7 +160,7 @@
 ## Componentes comuns (todas as telas)
 
 **Cabeçalho**
-- Logo "AgendaUni" (volta para a agenda);
+- Logo "agendaUNI" (volta para a agenda);
 - Menu, que muda conforme o perfil:
   - Visitante: Agenda;
   - Solicitante: Agenda · Minhas solicitações;

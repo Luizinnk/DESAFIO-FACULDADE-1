@@ -1,4 +1,4 @@
-# AgendaUni — Sistema de Gestão de Eventos Institucionais
+# agendaUNI — Sistema de Gestão de Eventos Institucionais
 
 Projeto do **Software Engineering Challenge 2026 — Univille (Campus São Bento do Sul)**.
 
@@ -7,59 +7,84 @@ Projeto do **Software Engineering Challenge 2026 — Univille (Campus São Bento
 
 ## Resumo
 
-Aplicação web que centraliza as solicitações de eventos do setor de Eventos da Univille:
+Aplicação web que reúne, em um só lugar, o pedido, a análise, a aprovação e a divulgação dos
+eventos institucionais da Univille.
 
-- **Visitante** (sem login): vê a grade pública com os eventos **aprovados** do mês atual e dos dois meses seguintes, em ordem cronológica.
-- **Solicitante**: cria a solicitação, salva **rascunho** ou **envia**, acompanha em *Minhas solicitações*, edita rascunhos/pendentes, corrige e reenvia rejeitados, exclui rascunhos e cancela pendentes.
-- **Administrador**: cadastra usuários, temas, locais (com seus recursos), recursos, cursos/coordenações e centros de custo; aprova ou rejeita (com justificativa); edita/cancela aprovados; emite relatório com filtros e exporta CSV.
+| Perfil | O que faz |
+|---|---|
+| **Visitante** (sem login) | Vê a agenda pública: eventos **aprovados** do mês atual e dos 2 meses seguintes, em ordem de data. |
+| **Solicitante** | Faz o pedido, salva **rascunho** ou **envia**, acompanha em *Meus pedidos*, edita rascunhos e pendentes, corrige e reenvia os rejeitados, exclui rascunhos e cancela pendentes. |
+| **Administrador** | Aprova ou rejeita (com motivo), edita e cancela aprovados, mantém cadastros (temas, locais e recursos, cursos, centros de custo), usuários e emite relatório com CSV. |
 
-Regra central: **conflito de agenda** — o sistema impede que dois eventos aprovados usem o mesmo local, na mesma data, com horários sobrepostos. A checagem acontece no **envio**, na **aprovação** e na **edição** de um aprovado.
+**Regra central — conflito de agenda:** dois eventos aprovados não podem ocupar o mesmo local, na
+mesma data, com horários sobrepostos. A checagem acontece no **envio**, na **aprovação** e na
+**edição** de um aprovado. Ex.: Auditório A 19h–20h aprovado → 19h30–21h é bloqueado; 20h–21h é aceito.
 
 ## Tecnologias
 
-| Camada | Tecnologia | Por quê |
-|---|---|---|
-| Servidor | Node.js 22.13+ e Express 5 | Simples, conhecido, poucas linhas para criar rotas |
-| Telas | EJS (HTML gerado no servidor) + CSS próprio | Sem framework de front-end; fácil de ler |
-| Banco | SQLite via `node:sqlite` (nativo do Node) | Banco real em arquivo, sem instalar servidor |
-| Login | `express-session` + `bcryptjs` | Sessão por cookie e senha guardada como hash |
+| Camada | Tecnologia |
+|---|---|
+| Backend (API REST) | **Java 21** + **Spring Boot 3.3** (Spring Web, Spring Data JPA) |
+| Banco de dados | **PostgreSQL 16** |
+| Frontend | **React 18** + **JavaScript** + **HTML** + **CSS** (sem framework de UI) |
+| Execução local do front | **Vite 5** (servidor de desenvolvimento com proxy para a API) |
+| Segurança | Senhas com hash **BCrypt**, sessão por cookie `HttpOnly`, controle de acesso por perfil |
 
-## Como executar
+## Como executar (local)
 
-Pré-requisito: **Node.js 22.13 ou superior** (`node -v`).
+### 1. Pré-requisitos
+
+- Java 21, PostgreSQL 16 e Node.js 18+ instalados. No macOS, com Homebrew:
 
 ```bash
-npm install      # instala as dependências
-npm run seed     # cria o banco data/agenda.db com dados fictícios
-npm start        # abre em http://localhost:3000
+brew install openjdk@21 postgresql@16 node
 ```
 
-Para desenvolver com recarga automática: `npm run dev`.
-
-## Configuração do banco
-
-- O banco é um arquivo **SQLite** em `data/agenda.db`, criado automaticamente na primeira execução.
-- As tabelas são criadas em [`src/db.js`](src/db.js) (`CREATE TABLE IF NOT EXISTS`).
-- `npm run seed` **apaga e recria** os dados fictícios ([`src/seed.js`](src/seed.js)).
-- Variáveis opcionais: `PORT` (padrão 3000), `DB_PATH` (outro arquivo de banco) e `SESSION_SECRET`.
-
-### Modelo de dados
-
-```
-usuarios (id, nome, email UNIQUE, senha_hash, perfil, ativo)
-centros_custo (id, codigo, nome)
-cursos (id, nome, centro_custo_id → centros_custo)
-temas (id, nome)        locais (id, nome)        recursos (id, nome)
-local_recursos (local_id → locais, recurso_id → recursos)          -- N:N
-eventos (id, autor_id → usuarios, solicitante (texto livre), nome, tema_id, data,
-         hora_inicio, hora_fim, local_id, curso_id, palestrante, publico_alvo,
-         justificativa, objetivo, cerimonial, inscricoes, declaracoes, observacoes,
-         status, motivo_rejeicao, criado_em, atualizado_em)
-evento_recursos (evento_id → eventos, recurso_id → recursos)       -- N:N
+```bash
+brew services start postgresql@16
 ```
 
-As chaves estrangeiras estão ativadas (`PRAGMA foreign_keys = ON`), então o próprio banco
-impede excluir um cadastro que ainda está em uso.
+- Se a máquina tiver mais de um Java, aponte para o 21 antes de rodar o backend:
+
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 21 2>/dev/null || echo /opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home)
+```
+
+### 2. Criar o banco (uma vez)
+
+```bash
+psql -d postgres -c "CREATE ROLE agendauni LOGIN PASSWORD 'agendauni';" -c "CREATE DATABASE agendauni OWNER agendauni;"
+```
+
+As credenciais acima são **fictícias, só para desenvolvimento local**. Para usar outras, defina
+`DB_URL`, `DB_USER` e `DB_PASSWORD` antes de iniciar o backend.
+
+### 3. Subir o backend (terminal 1)
+
+```bash
+npm run api
+```
+
+Na primeira execução o Maven Wrapper baixa as dependências. A API fica em `http://localhost:8080`.
+As tabelas são criadas pelo `schema.sql` e, se o banco estiver vazio, os dados fictícios são carregados.
+
+Para **apagar tudo e recarregar os dados de demonstração** (antes de apresentar):
+
+```bash
+npm run api:reset
+```
+
+### 4. Subir o frontend (terminal 2)
+
+```bash
+npm run instalar
+```
+
+```bash
+npm run web
+```
+
+Abra **http://localhost:5173**. O Vite repassa as chamadas `/api` para o Spring Boot.
 
 ## Usuários de teste (fictícios)
 
@@ -69,50 +94,86 @@ impede excluir um cadastro que ainda está em uso.
 | Solicitante | carlos@teste.com | carlos123 |
 | Solicitante | bia@teste.com | bia123 |
 
-O seed também cria eventos em todos os estados (aprovado, aguardando, rascunho, rejeitado, cancelado).
-O rascunho **"Bate-papo com egressos"** (Carlos) foi feito para demonstrar o conflito: tente enviá-lo
-com 19:30–21:00 (bloqueia) e depois com 20:00–21:00 (passa).
+Os dados de demonstração trazem eventos em todos os estados. O rascunho **"Bate-papo com egressos"**
+(Carlos) existe para mostrar o conflito: enviar com 19:30–21:00 é bloqueado; com 20:00–21:00 é aceito.
 
-## Estrutura do código
+## Estrutura do projeto
 
 ```
-src/
-  server.js          configura o Express, sessão e registra as rotas
-  db.js              conexão SQLite + criação das tabelas
-  seed.js            dados fictícios
-  regras.js          REGRAS DE NEGÓCIO: validações, conflito de agenda, salvar evento
-  middlewares.js     controle de acesso (login/admin) e mensagens
-  routes/
-    publico.js       página inicial (grade pública)
-    auth.js          login / logout
-    solicitante.js   minhas solicitações, formulário, rascunho, envio, excluir, cancelar
-    admin.js         análise, cadastros, usuários, relatório e CSV
-views/               telas EJS (partials = topo e rodapé)
-public/style.css     visual
+backend/                                   API Java + Spring Boot
+  src/main/resources/
+    application.properties                 conexão com o banco e configurações
+    schema.sql                             ESTRUTURA DO BANCO (tabelas, chaves, índices)
+  src/main/java/br/univille/agendauni/
+    model/          entidades JPA (Usuario, Evento, Local, Recurso, Tema, Curso, CentroCusto)
+    repository/     acesso ao banco (EventoRepository tem a consulta de CONFLITO)
+    service/
+      EventoService.java     REGRAS DE NEGÓCIO: validações, conflito, aprovar, rejeitar, cancelar
+      DadosIniciais.java     dados fictícios da demonstração
+    controller/     rotas da API (auth, público, solicitações, admin, cadastros, usuários, relatório)
+    config/         ControleDeAcesso (login e perfil), BCrypt
+    exception/      erros viram JSON { "erros": [...] }
+    dto/            formatos de entrada e saída da API
+
+frontend/                                  React + Vite
+  public/logo-univille.png                 símbolo da Univille
+  src/
+    api.js          única função que conversa com a API
+    auth.jsx        quem está logado (contexto)
+    App.jsx         rotas e proteção por perfil
+    components/     Logo, Cabecalho (menu de cima e menu inferior no celular), Avisos, Confirmar...
+    pages/          Agenda, Login, MinhasSolicitacoes, FormularioEvento, DetalheEvento
+    pages/admin/    Solicitacoes, Cadastros, Usuarios, Relatorio
+    styles.css      identidade visual (verdes da Univille) e versão para celular
 ```
+
+## Principais rotas da API
+
+| Método e rota | Quem | O que faz |
+|---|---|---|
+| `GET /api/publico/agenda` | todos | eventos aprovados do mês atual + 2 |
+| `POST /api/auth/login` / `logout`, `GET /api/auth/eu` | todos | login por sessão |
+| `GET /api/opcoes` | logado | temas, locais (com recursos) e cursos (com centro de custo) |
+| `GET/POST/PUT/DELETE /api/solicitacoes` (`?acao=salvar\|enviar`) | solicitante | próprios pedidos |
+| `POST /api/solicitacoes/{id}/cancelar` | solicitante | cancela pendente |
+| `GET /api/admin/solicitacoes?status=` | admin | lista por status |
+| `POST /api/admin/solicitacoes/{id}/aprovar` \| `rejeitar` \| `cancelar`, `PUT .../{id}` | admin | análise e edição |
+| `/api/admin/cadastros/{temas\|recursos\|locais\|cursos\|centros-custo}` | admin | CRUD dos cadastros |
+| `/api/admin/usuarios` (+ `/{id}/ativo`) | admin | usuários |
+| `GET /api/admin/relatorio` e `/api/admin/relatorio/csv` | admin | relatório e CSV |
 
 ## Regras de negócio implementadas
 
-- **Estados:** `RASCUNHO → AGUARDANDO → APROVADO | REJEITADO`, e `CANCELADO`.
-  - Rascunho: pode estar incompleto (só o nome é exigido); autor edita ou exclui.
-  - Aguardando: autor edita ou cancela; admin aprova ou rejeita.
-  - Rejeitado: justificativa obrigatória, visível ao autor; pode corrigir e reenviar.
-  - Aprovado: aparece na página pública; só o admin edita ou cancela.
-  - Cancelado: não aparece na página pública; registro mantido.
-- **Envio:** todos os campos obrigatórios, data hoje ou futura, horário final maior que o inicial
-  (um único dia), recursos precisam pertencer ao local escolhido e checagem de conflito.
-- **Conflito:** `inicio_novo < fim_existente` **e** `fim_novo > inicio_existente`, mesmo local e data,
-  apenas contra eventos **aprovados**. Locais diferentes no mesmo horário são permitidos.
-- **Centro de custo:** definido automaticamente pelo curso/coordenação.
-- **Solicitante x autor:** o campo "Solicitante" é texto livre; o usuário logado é gravado separadamente em `autor_id`.
-- **Cadastros:** exclusão só sem vínculos (chave estrangeira); usuários são desativados, não apagados; e-mail único.
-- **Relatório:** filtros por período, curso, tema (e status), combináveis; o CSV exporta exatamente o mesmo resultado.
-- **Segurança:** senha com hash bcrypt, sem autocadastro, rotas de admin protegidas, solicitante só vê os próprios pedidos.
+- **Estados:** Rascunho → Aguardando aprovação → Aprovado ou Rejeitado; e Cancelado.
+- **Rascunho** aceita dados incompletos (só exige o nome). **Envio** exige todos os campos obrigatórios.
+- Data de hoje em diante; término depois do início (um único dia, um único local).
+- Os recursos que podem ser marcados dependem do local; o servidor confere de novo.
+- O centro de custo vem automaticamente do curso/coordenação.
+- O nome livre "Solicitante" é diferente do usuário logado (`autor_id`), e os dois ficam gravados.
+- Rejeição exige motivo, que aparece para o autor. Aprovação revalida tudo, inclusive o conflito.
+- Cancelado não aparece na agenda pública; o registro é mantido.
+- Cadastros em uso não podem ser excluídos (chave estrangeira no banco). Usuários são desativados, não apagados.
+- E-mail único; senha com hash BCrypt; sem autocadastro.
+- Solicitante só vê os próprios pedidos; rotas `/api/admin` só para administradores.
+- Relatório com filtros combináveis (período, curso, tema, status); o CSV sai com os mesmos filtros e campos.
+
+## Usabilidade (pensada para quem não é da área de tecnologia)
+
+- Linguagem simples ("Meus pedidos", "Começa às", "Precisa emitir declarações?").
+- Botões e campos grandes (mínimo de 48px), fáceis de tocar no celular.
+- No celular, o menu vira uma **barra fixa embaixo**, como nos aplicativos.
+- Formulário em **4 passos numerados**, com contador de campos que faltam e barra de ações sempre visível.
+- Campos que faltam ficam **marcados em vermelho** com a explicação logo abaixo.
+- Cada status vem com uma frase explicando **o que acontece agora**.
+- Confirmação antes de ações sem volta (excluir, cancelar, aprovar, rejeitar).
+- Mensagens de sucesso e erro aparecem e somem sozinhas.
 
 ## Componentes reutilizados
 
-Não foram usados templates nem componentes prontos de interface. Bibliotecas de terceiros: Express,
-express-session, EJS e bcryptjs (npm). Todo o código do sistema de eventos foi escrito durante o desafio.
+Nenhum template ou kit de interface pronto. Bibliotecas de terceiros: Spring Boot, Spring Data JPA,
+driver PostgreSQL, Spring Security Crypto (só BCrypt), Lombok, React, React Router e Vite.
+Ícones desenhados em SVG no próprio projeto. Fontes Inter e Montserrat (Google Fonts).
+Todo o código do sistema de eventos foi escrito durante o desafio.
 
 ## Ferramentas de IA utilizadas
 

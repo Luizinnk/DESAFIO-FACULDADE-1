@@ -9,7 +9,7 @@
 **Equipe:** ____________  **Representante:** ____________ (WhatsApp: ________)
 
 ## 1. Ideia geral da solução
-Hoje o setor de Eventos recebe pedidos por formulários soltos. Vamos criar o **AgendaUni**:
+Hoje o setor de Eventos recebe pedidos por formulários soltos. Vamos criar o **agendaUNI**:
 um sistema web onde:
 - o **visitante** vê a grade pública de eventos aprovados (mês atual + 2 meses);
 - o **solicitante** faz login, preenche o pedido, salva rascunho ou envia;
@@ -34,10 +34,10 @@ Ciclo da solicitação:
 7. **Admin – Relatório** – filtros data início/fim, curso, tema → tabela + [Exportar CSV].
 
 ## 3. Tecnologias
-- **Node.js + Express** (servidor web)
-- **EJS** (páginas HTML geradas no servidor — simples, sem framework de front)
-- **SQLite** (banco real em arquivo, via módulo `node:sqlite` nativo do Node)
-- **bcryptjs** (senha com hash) + **express-session** (login)
+- **Java + Spring Boot** (API REST com as regras de negócio)
+- **PostgreSQL** (banco de dados relacional real)
+- **React + JavaScript + HTML + CSS** (telas), rodando localmente com **Vite**
+- **BCrypt** (senha com hash) + sessão por cookie (login)
 - GitHub para versionamento; IA (Claude) como assistente, declarada no README.
 
 ## 4. Divisão de responsabilidades (ajuste aos nomes da equipe)

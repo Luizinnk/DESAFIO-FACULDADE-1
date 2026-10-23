@@ -1,4 +1,8 @@
-node_modules/
-data/
-.env
+# Frontend
+frontend/node_modules/
+frontend/dist/
+# Backend
+backend/target/
+# Sistema
 .DS_Store
+.env

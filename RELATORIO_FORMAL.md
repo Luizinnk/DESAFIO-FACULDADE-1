@@ -17,7 +17,7 @@
 
 ### 1. Apresentação da solução
 
-A equipe propõe o desenvolvimento do **AgendaUni**, uma aplicação web destinada a consolidar,
+A equipe propõe o desenvolvimento do **agendaUNI**, uma aplicação web destinada a consolidar,
 em um único ambiente, o recebimento, a análise, a aprovação e a divulgação dos eventos
 institucionais da Univille, substituindo o atual processo baseado em formulários dispersos.
 
@@ -57,15 +57,16 @@ bloqueada, enquanto uma das 20h às 21h é aceita.
 
 | Camada | Tecnologia |
 |---|---|
-| Servidor | Node.js com Express |
-| Interface | Páginas EJS geradas no servidor e CSS próprio |
-| Banco de dados | SQLite (persistência real em arquivo) |
-| Autenticação | Sessão (express-session) e senhas com hash (bcrypt) |
+| Backend (API) | Java com Spring Boot |
+| Interface | React, JavaScript, HTML e CSS, executados com Vite |
+| Banco de dados | PostgreSQL (persistência real) |
+| Autenticação | Sessão por cookie e senhas com hash (BCrypt) |
 | Versionamento | Git e GitHub (repositório público) |
 | Apoio | Assistente de IA (Claude), declarado no README |
 
-**Justificativa:** as tecnologias escolhidas são de baixa complexidade, conhecidas pela equipe e
-não dependem de serviços externos, o que reduz o risco de falhas no prazo e na demonstração.
+**Justificativa:** são tecnologias consolidadas no mercado, que separam com clareza a interface (React),
+as regras de negócio (Spring Boot) e os dados (PostgreSQL), e que rodam inteiramente na máquina local,
+sem depender de serviços externos durante a demonstração.
 
 ### 4. Distribuição de responsabilidades
 
@@ -123,6 +124,6 @@ não dependem de serviços externos, o que reduz o risco de falhas no prazo e na
 
 ### B.5 Encerramento formal (fala final)
 
-"Em síntese, o AgendaUni atende aos três perfis definidos no caderno, aplica as regras de
+"Em síntese, o agendaUNI atende aos três perfis definidos no caderno, aplica as regras de
 negócio exigidas e mantém os dados em um banco real. Agradecemos a atenção da banca e
 estamos à disposição para perguntas."

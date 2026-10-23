@@ -1,81 +1,88 @@
 # Guia de estudo e apresentação (5 minutos)
 
+## Antes de apresentar
+
+1. Terminal 1: `npm run api:reset` (sobe a API e volta os dados ao estado inicial).
+2. Terminal 2: `npm run web` e abra http://localhost:5173.
+3. Deixe uma aba anônima pronta para o segundo usuário (solicitante e admin ao mesmo tempo).
+
 ## Roteiro da demo (cronometrado)
 
 | Tempo | O que mostrar | O que falar |
 |---|---|---|
-| 0:00–0:30 | Página inicial | "Visitante sem login vê só eventos aprovados, mês atual + 2, em ordem de data." |
-| 0:30–1:45 | Login **carlos@teste.com** → Minhas solicitações → abrir "Bate-papo com egressos" → Editar → **Enviar** | Aparece o **erro de conflito** (19:30 bate com 19:00–20:00 no Auditório A). Trocar para **20:00** → Enviar → passa. "Encostar no horário pode, sobrepor não." |
-| 1:45–2:45 | Sair → login **admin@teste.com** → Analisar → abrir o pedido → **Aprovar** | "Na aprovação o sistema checa o conflito de novo, porque outro evento pode ter sido aprovado depois do envio." Voltar na página inicial: o evento apareceu. |
-| 2:45–3:15 | Abrir outro pendente → Rejeitar **sem** motivo (erro) → com motivo | "Justificativa obrigatória; o solicitante vê o motivo e pode corrigir e reenviar." |
-| 3:15–4:00 | **Persistência**: Cadastros → Temas → criar "Mesa redonda" → **F5** → continua lá → tentar excluir "Palestra" | "Está no banco SQLite. E o banco recusa excluir tema em uso (chave estrangeira)." |
-| 4:00–4:40 | Relatório → filtrar por curso → **Exportar CSV** | "Filtros combináveis; o CSV é a mesma consulta." |
-| 4:40–5:00 | Fechar | "Node + Express + SQLite, senha com hash, código separado em rotas e regras." |
-
-> Antes de apresentar: `npm run seed` para voltar os dados ao estado inicial.
+| 0:00–0:30 | Agenda pública | "Visitante sem login vê só eventos aprovados, do mês atual mais dois, em ordem de data." |
+| 0:30–1:45 | Entrar como **carlos@teste.com** → Meus pedidos → "Bate-papo com egressos" → Editar pedido → **Enviar** | Aparece o **conflito** (19:30 bate com 19:00–20:00 no Auditório A). Mudar "Começa às" para **20:00** → Enviar → aceito. "Encostar no horário pode, sobrepor não." |
+| 1:45–2:45 | Entrar como **admin@teste.com** → Solicitações → abrir o pedido → **Aprovar** → confirmar | "Na aprovação o sistema checa o conflito de novo." Abrir a Agenda: o evento apareceu. |
+| 2:45–3:15 | Abrir "Congresso de Mecânica" → Rejeitar → tentar sem motivo → com motivo | "O motivo é obrigatório e o solicitante vê; ele pode corrigir e reenviar." |
+| 3:15–4:00 | **Persistência**: Cadastros → Temas → criar "Mesa redonda" → **F5** → continua → tentar excluir "Palestra" | "Está no PostgreSQL. E o próprio banco recusa excluir tema em uso (chave estrangeira)." |
+| 4:00–4:40 | Relatório → filtrar por curso → **Exportar CSV** | "Filtros combináveis; o CSV usa a mesma consulta." |
+| 4:40–5:00 | Mostrar no celular (ou reduzir a janela) | "Pensado para qualquer pessoa: botões grandes, menu embaixo como em aplicativo, linguagem simples." |
 
 ---
+
+## Arquitetura em uma frase
+
+**React (tela) → API REST em Spring Boot (regras) → PostgreSQL (dados).**
+O Vite serve o React em desenvolvimento e repassa `/api` para o Spring Boot na porta 8080.
 
 ## Perguntas prováveis da banca (e respostas)
 
 **Por que essas tecnologias?**
-Node/Express é simples e a equipe conhece JavaScript. EJS gera o HTML no servidor, então não
-precisa de API separada nem React. SQLite é um banco SQL real em arquivo: não precisa instalar
-servidor, e o `node:sqlite` já vem no Node.
+Java + Spring Boot é padrão de mercado para APIs, com injeção de dependências e JPA prontos.
+React separa a tela da regra e permite uma interface mais fluida. PostgreSQL é um banco relacional
+robusto, com chaves estrangeiras e restrições que protegem os dados. O Vite deixa o front rápido em desenvolvimento.
 
-**Onde está o banco? É real?**
-Arquivo `data/agenda.db`. As tabelas estão em `src/db.js`. Dá para abrir com qualquer cliente SQLite
-(ex.: DB Browser for SQLite) e ver os registros mudando.
+**Onde está a estrutura do banco?**
+`backend/src/main/resources/schema.sql`. Roda a cada inicialização com `CREATE TABLE IF NOT EXISTS`.
+Dá para abrir no terminal: `psql postgresql://agendauni:agendauni@localhost:5432/agendauni` e `\dt`.
 
-**Como funciona a regra de conflito?** (`src/regras.js`, função `buscarConflito`)
-Busca evento **APROVADO**, no **mesmo local**, na **mesma data**, com
-`hora_inicio_existente < hora_fim_nova` **E** `hora_fim_existente > hora_inicio_nova`.
+**Como funciona a regra de conflito?** (`EventoRepository.buscarConflitos`)
+Busca evento **APROVADO**, mesmo **local**, mesma **data**, com
+`horaInicio_existente < horaFim_nova` **E** `horaFim_existente > horaInicio_nova`.
 - 19:00–20:00 vs 19:30–21:00 → 19:00 < 21:00 e 20:00 > 19:30 → **conflita**
 - 19:00–20:00 vs 20:00–21:00 → 20:00 > 20:00 é falso → **não conflita**
-Ignora o próprio evento (`e.id <> ?`) para o admin poder editar um aprovado sem conflitar com ele mesmo.
+Ignora o próprio evento (`e.id <> :ignorarId`) para o admin poder editar um aprovado.
 
-**Por que checar de novo na aprovação?**
-Dois pedidos podem ser enviados para o mesmo horário (nenhum aprovado ainda). Ao aprovar o primeiro,
-o segundo passa a conflitar — então a aprovação revalida.
+**Por que checar de novo na aprovação?** (`EventoService.aprovar`)
+Dois pedidos podem ser enviados para o mesmo horário enquanto nenhum está aprovado.
+Aprovado o primeiro, o segundo passa a conflitar, então a aprovação revalida.
 
-**Por que comparar horário como texto funciona?**
-Porque sempre está no formato `HH:MM` com 2 dígitos: "09:00" < "10:30" em ordem alfabética também.
+**Onde ficam as regras de negócio?**
+Em `EventoService.java`: `validarRascunho`, `validarEnvio`, `aprovar`, `rejeitar`, `cancelar`, `excluirRascunho`.
+Os controllers só recebem a requisição e chamam o serviço (camadas: controller → service → repository).
 
-**Como a senha é guardada?**
-Com **bcrypt** (hash com salt). No login usamos `bcrypt.compareSync` contra o hash. A senha pura
-nunca é salva.
+**Como funciona o login e as permissões?**
+`AuthController` confere a senha com `BCryptPasswordEncoder.matches` e guarda `{id, nome, perfil}` na sessão
+(cookie `HttpOnly`). O `ControleDeAcesso` roda antes de toda rota `/api`: sem login → 401; rota `/api/admin` sem
+perfil ADMIN → 403. No `SolicitacaoController`, `doAutor()` garante que o solicitante só abre os próprios pedidos.
 
-**Como o sistema sabe quem pode o quê?** (`src/middlewares.js`)
-Na sessão fica `{ id, nome, perfil }`. `exigirLogin` protege a área do solicitante e `exigirAdmin`
-protege tudo em `/admin`. Além disso, o solicitante só abre eventos onde `autor_id` é o dele (senão 404).
+**A senha é guardada como?**
+Hash BCrypt (com salt). Nunca a senha pura.
 
-**Qual a diferença entre "Solicitante" e "autor"?**
-"Solicitante" é texto livre digitado no formulário (ex.: "Prof. Carlos Lima"). O `autor_id` é o
-usuário logado que registrou. São campos separados, como pede o caderno.
-
-**Como funciona rascunho vs envio?**
-O formulário tem dois botões com o mesmo `name="acao"`: `salvar` ou `enviar`. Salvar só exige o nome.
+**Rascunho x envio?**
+O mesmo formulário chama a API com `?acao=salvar` ou `?acao=enviar`. Salvar só exige o nome.
 Enviar roda `validarEnvio` (obrigatórios, data, horário, recursos do local, conflito) e muda para AGUARDANDO.
 
-**Como o local filtra os recursos?**
-Tabela `local_recursos` (N:N). O formulário recebe a lista e um JavaScript pequeno mostra só os recursos
-do local escolhido. O servidor **valida de novo** (`validarRecursosDoLocal`), porque o navegador pode ser burlado.
+**Como os recursos dependem do local?**
+Tabela `local_recursos` (N:N). O React mostra só os recursos do local escolhido e desmarca ao trocar de local;
+o backend valida de novo (`validarRecursosDoLocal`), porque a tela pode ser burlada.
 
 **E o centro de custo automático?**
-O curso tem `centro_custo_id`. O formulário mostra o centro ao escolher o curso, e relatórios
-pegam o centro via JOIN — não é digitado pelo usuário.
+`cursos.centro_custo_id`. A tela mostra o centro ao escolher o curso; o relatório pega via relacionamento.
 
-**Como funciona a exclusão de cadastros com vínculo?**
-`PRAGMA foreign_keys = ON`. Se o tema está em algum evento, o `DELETE` falha com erro de chave
-estrangeira e mostramos uma mensagem amigável. Usuários não são apagados, são **desativados**.
+**Excluir cadastro em uso?**
+O PostgreSQL recusa por chave estrangeira; o `TratadorDeErros` transforma em mensagem amigável (HTTP 409).
 
-**Como o CSV é gerado?**
-A função `consultaRelatorio` monta o `WHERE` só com os filtros preenchidos. A tela e o CSV usam a
-**mesma função**, então sempre batem. Separador `;` e BOM UTF-8 para abrir certo no Excel brasileiro.
+**Como o relatório e o CSV batem?**
+`RelatorioController.consultar` monta o JPQL só com os filtros preenchidos; a tela e o CSV chamam a mesma função.
+CSV com `;` e BOM UTF-8 para abrir certo no Excel em português.
 
-**Proteção contra SQL injection?**
-Todas as consultas usam `prepare(...)` com `?` (parâmetros), nunca concatenam valor digitado.
-Os nomes de tabela nos cadastros vêm de uma lista fixa (`CADASTROS`), não do usuário.
+**SQL injection?**
+Consultas com parâmetros nomeados (`:localId`) via JPA. Nenhum valor digitado é concatenado no SQL.
+
+**Usabilidade para leigos?**
+Menu inferior no celular, botões grandes, formulário em 4 passos com contador do que falta, campos em vermelho,
+frase explicando cada status, confirmação antes de ações sem volta.
 
 **Usaram IA?**
 Sim, declarado no README (o regulamento permite com transparência). Seja honesto aqui.
@@ -86,12 +93,15 @@ Sim, declarado no README (o regulamento permite com transparência). Seja honest
 
 | Requisito | Arquivo |
 |---|---|
-| Grade pública (mês atual + 2) | `src/routes/publico.js` |
-| Login / hash | `src/routes/auth.js` |
-| Rascunho, envio, editar, excluir, cancelar | `src/routes/solicitante.js` |
-| Validações e conflito | `src/regras.js` |
-| Aprovar / rejeitar / editar aprovado | `src/routes/admin.js` (seção SOLICITAÇÕES) |
-| Cadastros auxiliares | `src/routes/admin.js` (seção CADASTROS) + `views/admin/cadastro.ejs` |
-| Usuários | `src/routes/admin.js` (seção USUÁRIOS) |
-| Relatório e CSV | `src/routes/admin.js` (seção RELATÓRIO) |
-| Tabelas | `src/db.js` |
+| Tabelas | `backend/src/main/resources/schema.sql` |
+| Conflito de agenda | `backend/.../repository/EventoRepository.java` |
+| Validações, aprovar, rejeitar | `backend/.../service/EventoService.java` |
+| Login e permissões | `controller/AuthController.java`, `config/ControleDeAcesso.java` |
+| Agenda pública | `controller/PublicoController.java` + `frontend/src/pages/Agenda.jsx` |
+| Pedido (rascunho/envio) | `controller/SolicitacaoController.java` + `pages/FormularioEvento.jsx` |
+| Análise do admin | `controller/AdminSolicitacaoController.java` + `pages/DetalheEvento.jsx` |
+| Cadastros | `controller/CadastroController.java` + `pages/admin/Cadastros.jsx` |
+| Usuários | `controller/UsuarioController.java` + `pages/admin/Usuarios.jsx` |
+| Relatório e CSV | `controller/RelatorioController.java` + `pages/admin/Relatorio.jsx` |
+| Dados fictícios | `service/DadosIniciais.java` |
+| Visual e celular | `frontend/src/styles.css`, `components/Cabecalho.jsx` |

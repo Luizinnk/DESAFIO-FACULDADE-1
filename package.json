@@ -1,23 +1,11 @@
 {
   "name": "agendauni",
-  "version": "1.0.0",
-  "description": "Sistema de Gestão de Eventos Institucionais - Univille Engineering Challenge 2026",
-  "main": "src/server.js",
+  "private": true,
+  "description": "Atalhos para rodar o AgendaUNI (backend Spring Boot + frontend React/Vite)",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
-    "seed": "node src/seed.js"
-  },
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "ejs": "^7.0.2",
-    "express": "^5.3.0",
-    "express-session": "^1.19.0"
-  },
-  "engines": {
-    "node": ">=22.13"
-  },
-  "private": true
+    "api": "cd backend && ./mvnw spring-boot:run",
+    "api:reset": "cd backend && ./mvnw spring-boot:run -Dspring-boot.run.arguments=--app.reset-dados=true",
+    "web": "npm --prefix frontend run dev",
+    "instalar": "npm --prefix frontend install"
+  }
 }
