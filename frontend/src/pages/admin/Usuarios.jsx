@@ -3,6 +3,7 @@ import { api } from '../../api.js';
 import { useAuth } from '../../auth.jsx';
 import { useAvisos } from '../../components/Avisos.jsx';
 import Campo from '../../components/Campo.jsx';
+import { BotaoAjuda } from '../../components/Ajuda.jsx';
 import Icone from '../../components/Icone.jsx';
 import { CaixaErros, Esqueleto, TituloPagina } from '../../components/Comuns.jsx';
 import { iniciais } from '../../util.js';
@@ -57,7 +58,7 @@ export default function Usuarios() {
 
   return (
     <>
-      <TituloPagina titulo="Usuários" subtitulo="Quem pode entrar no sistema e o que pode fazer.">
+      <TituloPagina titulo="Usuários" ajuda="usuarios" subtitulo="Quem pode entrar no sistema e o que pode fazer.">
         <button className="botao botao-primario" onClick={() => abrir(null)}><Icone nome="mais" /> Novo usuário</button>
       </TituloPagina>
 
@@ -112,7 +113,7 @@ export default function Usuarios() {
               <input type="password" autoComplete="new-password" value={form.senha} onChange={alterar('senha')} />
             </Campo>
             <div className="campo">
-              <span id="rotulo-perfil" className="rotulo">Perfil</span>
+              <div className="rotulo-linha"><span id="rotulo-perfil" className="rotulo">Perfil</span><BotaoAjuda topico="perfis" /></div>
               <div className="sim-nao largo" role="radiogroup" aria-labelledby="rotulo-perfil">
                 <button type="button" role="radio" aria-checked={form.perfil === 'SOLICITANTE'} className={form.perfil === 'SOLICITANTE' ? 'ativo' : ''} onClick={() => setForm({ ...form, perfil: 'SOLICITANTE' })}>Solicitante</button>
                 <button type="button" role="radio" aria-checked={form.perfil === 'ADMIN'} className={form.perfil === 'ADMIN' ? 'ativo' : ''} onClick={() => setForm({ ...form, perfil: 'ADMIN' })}>Administrador</button>

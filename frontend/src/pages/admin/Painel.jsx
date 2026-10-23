@@ -15,7 +15,7 @@ export default function Painel() {
 
   return (
     <>
-      <TituloPagina titulo={`Olá, ${usuario.nome.split(' ')[0]}`} subtitulo="Veja o que precisa da sua atenção." />
+      <TituloPagina titulo={`Olá, ${usuario.nome.split(' ')[0]}`} subtitulo="Veja o que precisa da sua atenção." ajuda="analisar" />
 
       {!painel && <Esqueleto quantidade={3} />}
       {painel && (

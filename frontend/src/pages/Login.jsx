@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 import Icone from '../components/Icone.jsx';
 import { CONTATO_EVENTOS } from '../util.js';
+import { BotaoAjuda } from '../components/Ajuda.jsx';
 
 /** TELA 2 — Login. Não existe autocadastro: o setor de Eventos cria as contas. */
 export default function Login() {
@@ -35,7 +36,7 @@ export default function Login() {
     <div className="login">
       <form className="cartao login-cartao" onSubmit={enviar}>
         <img src="/logo-univille.png" alt="" className="login-simbolo" />
-        <h1>Entrar no AgendaUNI</h1>
+        <h1>Entrar no AgendaUNI <BotaoAjuda topico="acesso" /></h1>
         <p className="texto-apoio">Use o e-mail e a senha que o setor de Eventos enviou para você.</p>
 
         {erro && <div className="caixa-erros" role="alert"><Icone nome="alerta" /> {erro}</div>}

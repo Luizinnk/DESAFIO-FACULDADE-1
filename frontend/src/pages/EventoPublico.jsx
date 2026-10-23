@@ -63,7 +63,7 @@ export default function EventoPublico() {
 
   return (
     <article className="pagina-evento">
-      <TituloPagina titulo={e.nome} voltar="/" subtitulo={`${e.tema} · Realização: ${e.curso}`} />
+      <TituloPagina titulo={e.nome} voltar="/" ajuda="calendario" subtitulo={`${e.tema} · Realização: ${e.curso}`} />
       {e.imagem && <img className="evento-capa" src={e.imagem} alt={`Arte do evento ${e.nome}`} />}
 
       <div className="resumo-evento">

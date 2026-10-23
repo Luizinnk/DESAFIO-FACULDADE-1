@@ -29,7 +29,7 @@ export default function MinhasSolicitacoes() {
 
   return (
     <>
-      <TituloPagina titulo="Meus pedidos" subtitulo="Acompanhe aqui a situação de cada solicitação.">
+      <TituloPagina titulo="Meus pedidos" ajuda="acompanhar" subtitulo="Acompanhe aqui a situação de cada solicitação.">
         <Link to="/solicitacoes/nova" className="botao botao-primario"><Icone nome="mais" /> Novo pedido</Link>
       </TituloPagina>
 

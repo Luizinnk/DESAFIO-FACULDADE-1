@@ -551,3 +551,81 @@ th.coluna-fixa { background: var(--verde-50); }
   .indicador { padding: 14px; }
   .indicador strong { font-size: 1.6rem; }
 }
+
+/* =========================================================================
+   Ajuda: botão "?", painel com passo a passo e dúvidas frequentes
+   ========================================================================= */
+.botao-ajuda { display: inline-grid; place-items: center; flex: none; width: 26px; height: 26px; padding: 0; margin-left: 8px;
+  border-radius: 50%; border: 1.5px solid var(--verde-600); background: var(--superficie); color: var(--verde-700);
+  font: 700 .85rem/1 var(--fonte); cursor: pointer; vertical-align: middle; position: relative; }
+.botao-ajuda::after { content: ''; position: absolute; inset: -9px; } /* área de toque maior que o desenho */
+.botao-ajuda:hover { background: var(--verde-700); color: #fff; }
+.botao-ajuda.claro { border-color: rgba(255,255,255,.7); background: rgba(255,255,255,.12); color: #fff; }
+.botao-ajuda.claro:hover { background: #fff; color: var(--verde-800); }
+.titulo-pagina h1, .destaque h1 { display: flex; align-items: center; flex-wrap: wrap; }
+.rotulo-linha { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.rotulo-linha > label, .rotulo-linha > .rotulo { font-weight: 600; font-size: .95rem; color: var(--texto); }
+.rotulo-linha .botao-ajuda { margin-left: 0; width: 22px; height: 22px; font-size: .78rem; }
+.linha-com-ajuda { display: inline-flex; align-items: center; gap: 4px; }
+.disponibilidade-titulo .botao-ajuda { margin-left: auto; }
+.alerta-card .botao-ajuda { width: 22px; height: 22px; font-size: .78rem; margin-left: 6px; }
+legend .botao-ajuda, .rotulo-grupo .botao-ajuda { width: 22px; height: 22px; font-size: .78rem; }
+
+/* Botão "Ajuda" no cabeçalho */
+.botao-ajuda-topo { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px; border-radius: 10px;
+  text-decoration: none; color: var(--texto-suave); font-weight: 500; }
+.botao-ajuda-topo .botao-ajuda { margin: 0; pointer-events: none; }
+.botao-ajuda-topo:hover, .botao-ajuda-topo.active { background: var(--verde-50); color: var(--verde-800); }
+@media (max-width: 860px) { .texto-ajuda { display: none; } .botao-ajuda-topo { padding: 0 6px; } }
+
+/* Painel de ajuda: lateral no computador, de baixo para cima no celular */
+.ajuda-fundo { position: fixed; inset: 0; z-index: 70; background: rgba(10, 30, 18, .35); display: flex; justify-content: flex-end; }
+.ajuda-painel { width: min(440px, 100%); height: 100%; overflow-y: auto; background: var(--superficie); padding: 22px 24px 32px;
+  box-shadow: -10px 0 40px rgba(0,0,0,.18); animation: deslizar .2s ease-out; outline: none; }
+@keyframes deslizar { from { transform: translateX(30px); opacity: 0; } }
+.ajuda-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.ajuda-selo { font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--verde-700);
+  background: var(--verde-100); padding: 5px 10px; border-radius: 999px; }
+.ajuda-painel h2 { font-size: 1.35rem; color: var(--verde-900); margin-bottom: 6px; }
+.ajuda-passos { counter-reset: passo; list-style: none; padding: 0; margin: 18px 0; display: grid; gap: 12px; }
+.ajuda-passos li { counter-increment: passo; position: relative; padding-left: 42px; line-height: 1.5; }
+.ajuda-passos li::before { content: counter(passo); position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--verde-700); color: #fff; font-weight: 700; font-size: .85rem; }
+.ajuda-acao { width: 100%; margin-bottom: 8px; }
+.ajuda-acao .icone { transform: rotate(180deg); }
+.ajuda-resposta { font-size: 1.02rem; line-height: 1.6; }
+.ajuda-bloco { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--borda); }
+.ajuda-bloco h3 { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-suave); margin-bottom: 10px; }
+.ajuda-links { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+.ajuda-links button { width: 100%; text-align: left; min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: var(--fundo);
+  color: var(--verde-800); font-weight: 500; cursor: pointer; }
+.ajuda-links button:hover { background: var(--verde-50); }
+.ajuda-tudo { display: block; margin-top: 22px; font-weight: 600; }
+
+/* Pergunta frequente (abre e fecha) */
+.duvida { border-bottom: 1px solid var(--borda); }
+.duvida:last-child { border-bottom: 0; }
+.duvida summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  min-height: 52px; padding: 10px 4px; font-weight: 600; }
+.duvida summary::-webkit-details-marker { display: none; }
+.duvida summary::after { content: '+'; flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--verde-100); color: var(--verde-800); font-weight: 700; }
+.duvida[open] summary::after { content: '−'; }
+.duvida p { margin: 0 4px 16px; color: var(--texto-suave); line-height: 1.6; }
+
+/* Página Ajuda */
+.lista-ajuda { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.cartao-ajuda { display: flex; gap: 14px; align-items: flex-start; text-align: left; padding: 18px; border-radius: var(--raio);
+  border: 1px solid var(--borda); background: var(--superficie); box-shadow: var(--sombra); cursor: pointer; font: inherit; color: inherit; }
+.cartao-ajuda:hover { border-color: var(--verde-600); }
+.cartao-ajuda strong { display: block; margin-bottom: 4px; }
+.cartao-ajuda small { color: var(--texto-suave); }
+.cartao-ajuda-icone { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--verde-100); color: var(--verde-800); font-weight: 800; }
+.lista-duvidas { padding: 4px 20px; }
+
+@media (max-width: 600px) {
+  .ajuda-fundo { align-items: flex-end; }
+  .ajuda-painel { height: auto; max-height: 88vh; border-radius: 20px 20px 0 0; padding: 18px 18px 28px; animation-name: subir; }
+  @keyframes subir { from { transform: translateY(40px); opacity: 0; } }
+}

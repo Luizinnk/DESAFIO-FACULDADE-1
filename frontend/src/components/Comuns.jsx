@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { STATUS } from '../util.js';
 import Icone from './Icone.jsx';
+import { BotaoAjuda } from './Ajuda.jsx';
 
 /** Selo colorido com o status da solicitação. */
 export function SeloStatus({ status }) {
@@ -50,12 +51,12 @@ export function CaixaErros({ erros }) {
   );
 }
 
-export function TituloPagina({ titulo, subtitulo, children, voltar }) {
+export function TituloPagina({ titulo, subtitulo, children, voltar, ajuda }) {
   return (
     <div className="titulo-pagina">
       <div>
         {voltar && <Link to={voltar} className="link-voltar"><Icone nome="voltar" tamanho={18} /> Voltar</Link>}
-        <h1>{titulo}</h1>
+        <h1>{titulo}{ajuda && <BotaoAjuda topico={ajuda} />}</h1>
         {subtitulo && <p>{subtitulo}</p>}
       </div>
       {children && <div className="titulo-acoes">{children}</div>}

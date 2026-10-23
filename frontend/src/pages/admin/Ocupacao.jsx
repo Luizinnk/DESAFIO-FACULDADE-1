@@ -4,6 +4,7 @@ import { api } from '../../api.js';
 import { useAvisos } from '../../components/Avisos.jsx';
 import Campo from '../../components/Campo.jsx';
 import Confirmar from '../../components/Confirmar.jsx';
+import { BotaoAjuda } from '../../components/Ajuda.jsx';
 import Icone from '../../components/Icone.jsx';
 import { CaixaErros, Carregando, TituloPagina } from '../../components/Comuns.jsx';
 import { dataBR, emMinutos, hojeISO, partesData, somarDias } from '../../util.js';
@@ -56,7 +57,7 @@ export default function Ocupacao() {
 
   return (
     <>
-      <TituloPagina titulo="Ocupação dos locais" subtitulo="Veja, dia a dia, o que está reservado em cada sala." />
+      <TituloPagina titulo="Ocupação dos locais" ajuda="ocupacao" subtitulo="Veja, dia a dia, o que está reservado em cada sala." />
 
       <div className="navegar-dia">
         <button className="botao-icone" onClick={() => setData(somarDias(data, -1))} aria-label="Dia anterior"><Icone nome="voltar" /></button>
@@ -105,7 +106,7 @@ export default function Ocupacao() {
         </div>
       )}
 
-      <h2 className="titulo-secao">Bloqueios de local</h2>
+      <h2 className="titulo-secao">Bloqueios de local <BotaoAjuda topico="bloqueio" /></h2>
       <p className="texto-apoio">Use para manutenção, provas ou reformas. Durante o bloqueio, o sistema não aceita pedidos para o local.</p>
       <div className="duas-colunas">
         <form className="cartao" onSubmit={bloquear}>

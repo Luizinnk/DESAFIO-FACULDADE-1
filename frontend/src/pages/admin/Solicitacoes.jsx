@@ -28,7 +28,7 @@ export default function Solicitacoes() {
 
   return (
     <>
-      <TituloPagina titulo="Solicitações" subtitulo="Analise os pedidos e publique os eventos na agenda." />
+      <TituloPagina titulo="Solicitações" ajuda="analisar" subtitulo="Analise os pedidos e publique os eventos na agenda." />
       <nav className="abas" aria-label="Filtrar por status">
         {ABAS.map((s) => (
           <button key={s} className={s === status ? 'ativa' : ''} onClick={() => setParams({ status: s })} aria-pressed={s === status}>

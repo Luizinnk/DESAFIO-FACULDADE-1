@@ -4,6 +4,7 @@ import { api, enviarArquivo } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { useAvisos } from '../components/Avisos.jsx';
 import Campo from '../components/Campo.jsx';
+import { BotaoAjuda } from '../components/Ajuda.jsx';
 import Disponibilidade from '../components/Disponibilidade.jsx';
 import Icone from '../components/Icone.jsx';
 import { CaixaErros, Carregando, TituloPagina } from '../components/Comuns.jsx';
@@ -178,7 +179,7 @@ export default function FormularioEvento({ modo }) {
   return (
     <form onSubmit={(e) => { e.preventDefault(); gravar('enviar'); }} noValidate>
       <div ref={topo} />
-      <TituloPagina titulo={titulo} voltar={voltar}
+      <TituloPagina titulo={titulo} voltar={voltar} ajuda={admin ? 'analisar' : status === 'REJEITADO' ? 'corrigir' : 'solicitar'}
         subtitulo={admin ? 'As mudanças passam pela verificação de conflito de agenda.'
           : 'Preencha com calma. Você pode salvar e terminar depois.'} />
 
@@ -199,7 +200,7 @@ export default function FormularioEvento({ modo }) {
             </Campo>
           </div>
           <div data-campo="temaId">
-            <Campo rotulo="Tipo de evento (tema)" erro={erroDe('temaId')}>
+            <Campo rotulo="Tipo de evento (tema)" erro={erroDe('temaId')} topicoAjuda="tema">
               <select value={form.temaId} onChange={alterar('temaId')}>
                 <option value="">Escolha…</option>
                 {opcoes.temas.map((t) => <option key={t.id} value={t.id}>{t.nome}</option>)}
@@ -217,7 +218,7 @@ export default function FormularioEvento({ modo }) {
             </Campo>
           </div>
           <div data-campo="publicoEstimado">
-            <Campo rotulo="Público estimado" opcional erro={errosNaHora.publicoEstimado}
+            <Campo rotulo="Público estimado" opcional erro={errosNaHora.publicoEstimado} topicoAjuda="capacidade"
               ajuda={capacidade ? `O local escolhido comporta até ${capacidade} pessoas.` : 'Quantas pessoas devem participar.'}>
               <input type="number" min="1" inputMode="numeric" value={form.publicoEstimado} onChange={alterar('publicoEstimado')} placeholder="Ex.: 80" />
             </Campo>
@@ -226,7 +227,7 @@ export default function FormularioEvento({ modo }) {
       </section>
 
       <section className="cartao secao-form">
-        <Etapa n={2} completa={etapaCompleta(2)}>Quando e onde</Etapa>
+        <Etapa n={2} completa={etapaCompleta(2)}>Quando e onde <BotaoAjuda topico="horario" /></Etapa>
         <div className="grade-campos">
           <div data-campo="data">
             <Campo rotulo="Data" erro={erroDe('data')}>
@@ -258,7 +259,7 @@ export default function FormularioEvento({ modo }) {
           aoEscolherHorario={(ini, fim) => setForm((f) => ({ ...f, horaInicio: ini, horaFim: fim }))} />
 
         <fieldset className="bloco-recursos">
-          <legend className="rotulo-grupo">Do que você vai precisar? <small>(opcional)</small></legend>
+          <legend className="rotulo-grupo">Do que você vai precisar? <small>(opcional)</small> <BotaoAjuda topico="recursos" /></legend>
           {!local && <p className="texto-apoio">Escolha o local para ver os recursos disponíveis nele.</p>}
           {local && local.recursos.length === 0 && <p className="texto-apoio">Este local não oferece recursos extras.</p>}
           <div className="opcoes-marcar">
@@ -276,7 +277,7 @@ export default function FormularioEvento({ modo }) {
         <Etapa n={3} completa={etapaCompleta(3)}>Responsáveis</Etapa>
         <div className="grade-campos">
           <div data-campo="solicitante">
-            <Campo rotulo="Responsável pelo evento" ajuda="Já vem com o seu nome. Troque se outra pessoa responder pelo evento."
+            <Campo rotulo="Responsável pelo evento" topicoAjuda="responsavel" ajuda="Já vem com o seu nome. Troque se outra pessoa responder pelo evento."
               erro={erroDe('solicitante')}>
               <input value={form.solicitante} onChange={alterar('solicitante')} />
             </Campo>
@@ -289,7 +290,7 @@ export default function FormularioEvento({ modo }) {
               </select>
             </Campo>
           </div>
-          <Campo rotulo="Centro de custo" ajuda="Preenchido automaticamente pelo curso." opcional>
+          <Campo rotulo="Centro de custo" ajuda="Preenchido automaticamente pelo curso." opcional topicoAjuda="centro-custo">
             <input value={curso?.centroCusto || ''} readOnly placeholder="—" tabIndex={-1} />
           </Campo>
         </div>
@@ -309,6 +310,7 @@ export default function FormularioEvento({ modo }) {
             </Campo>
           </div>
         </div>
+        <p className="rotulo-grupo">Organização do evento <BotaoAjuda topico="perguntas" /></p>
         <div className="perguntas">
           <SimNao campo="cerimonial" rotulo="Vai precisar de cerimonial?" valor={form.cerimonial} invalido={tentouEnviar && vazio(form.cerimonial)}
             aoMudar={(v) => setForm({ ...form, cerimonial: v })} />
@@ -323,7 +325,7 @@ export default function FormularioEvento({ modo }) {
       </section>
 
       <section className="cartao secao-form">
-        <h2><span className="passo opcional" aria-hidden="true"><Icone nome="imagem" tamanho={18} /></span>Arte do evento <small className="opcional-texto">(opcional)</small></h2>
+        <h2><span className="passo opcional" aria-hidden="true"><Icone nome="imagem" tamanho={18} /></span>Arte do evento <small className="opcional-texto">(opcional)</small> <BotaoAjuda topico="arte" /></h2>
         <p className="texto-apoio">Se o evento já tem cartaz ou arte de divulgação, anexe aqui. Ela aparece no cartão da agenda pública depois da aprovação.</p>
         <div className="upload">
           {previa ? (

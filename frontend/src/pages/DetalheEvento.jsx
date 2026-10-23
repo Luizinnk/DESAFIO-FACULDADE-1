@@ -4,6 +4,7 @@ import { api } from '../api.js';
 import { useAvisos } from '../components/Avisos.jsx';
 import Confirmar from '../components/Confirmar.jsx';
 import Disponibilidade from '../components/Disponibilidade.jsx';
+import { BotaoAjuda } from '../components/Ajuda.jsx';
 import Icone from '../components/Icone.jsx';
 import { CaixaErros, Carregando, SeloStatus, TituloPagina } from '../components/Comuns.jsx';
 import { ACOES, dataBR, horario, simNao } from '../util.js';
@@ -93,7 +94,8 @@ export default function DetalheEvento({ modo }) {
 
   return (
     <>
-      <TituloPagina titulo={ev.nome} voltar={admin ? `/admin/solicitacoes?status=${ev.status}` : '/minhas'}>
+      <TituloPagina titulo={ev.nome} voltar={admin ? `/admin/solicitacoes?status=${ev.status}` : '/minhas'}
+        ajuda={admin ? 'analisar' : rejeitado ? 'corrigir' : 'acompanhar'}>
         <SeloStatus status={ev.status} />
       </TituloPagina>
 
@@ -103,7 +105,7 @@ export default function DetalheEvento({ modo }) {
       <div className={`alerta-card alerta-card-${ev.status}`}>
         <Icone nome={rejeitado ? 'alerta' : 'info'} />
         <div>
-          <strong>{fraseStatus(ev, admin)}</strong>
+          <strong>{fraseStatus(ev, admin)}</strong> <BotaoAjuda topico="status" />
           {rejeitado && ev.motivoRejeicao && <p className="motivo">Motivo: {ev.motivoRejeicao}</p>}
           {rejeitado && !admin && (
             <Link to={`/solicitacoes/${id}/editar`} className="botao botao-primario botao-pequeno"><Icone nome="lapis" /> Corrigir e reenviar</Link>

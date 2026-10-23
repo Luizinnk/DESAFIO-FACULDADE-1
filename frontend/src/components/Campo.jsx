@@ -1,10 +1,11 @@
 import { Children, cloneElement, isValidElement, useId } from 'react';
+import { BotaoAjuda } from './Ajuda.jsx';
 
 /**
  * Campo de formulário acessível: o rótulo fica ligado ao campo (htmlFor/id),
  * a dica e o erro são lidos pelo leitor de tela (aria-describedby) e o erro é anunciado (role="alert").
  */
-export default function Campo({ rotulo, ajuda, erro, largo, opcional, children }) {
+export default function Campo({ rotulo, ajuda, erro, largo, opcional, topicoAjuda, children }) {
   const id = useId();
   const idAjuda = `${id}-ajuda`;
   const filho = Children.only(children);
@@ -18,7 +19,10 @@ export default function Campo({ rotulo, ajuda, erro, largo, opcional, children }
 
   return (
     <div className={`campo ${largo ? 'largo' : ''} ${erro ? 'invalido' : ''}`}>
-      <label htmlFor={id}>{rotulo}{!opcional && <em className="obrigatorio" aria-hidden="true"> *</em>}</label>
+      <div className="rotulo-linha">
+        <label htmlFor={id}>{rotulo}{!opcional && <em className="obrigatorio" aria-hidden="true"> *</em>}</label>
+        {topicoAjuda && <BotaoAjuda topico={topicoAjuda} />}
+      </div>
       {campo}
       {erro
         ? <small id={idAjuda} className="ajuda erro" role="alert">{erro}</small>

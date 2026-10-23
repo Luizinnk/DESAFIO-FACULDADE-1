@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { dataBR, deMinutos, emMinutos, sobrepoe } from '../util.js';
 import Icone from './Icone.jsx';
+import { BotaoAjuda } from './Ajuda.jsx';
 
 const ABRE = 7 * 60;   // 07:00
 const FECHA = 23 * 60; // 23:00
@@ -55,6 +56,7 @@ export default function Disponibilidade({ localId, data, inicio, fim, ignorarId,
       <p className="disponibilidade-titulo">
         <strong>{info.local}</strong> em {dataBR(data)}
         {info.capacidade && <span className="etiqueta">até {info.capacidade} pessoas</span>}
+        <BotaoAjuda topico="conflito" />
       </p>
 
       {info.bloqueio && (

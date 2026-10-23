@@ -49,7 +49,7 @@ export default function Relatorio() {
 
   return (
     <>
-      <TituloPagina titulo="Relatório de eventos" subtitulo="Os filtros são aplicados na hora. Exporte o resultado para planilha." />
+      <TituloPagina titulo="Relatório de eventos" ajuda="relatorio" subtitulo="Os filtros são aplicados na hora. Exporte o resultado para planilha." />
 
       <section className="cartao">
         <div className="atalhos" role="group" aria-label="Atalhos de período">

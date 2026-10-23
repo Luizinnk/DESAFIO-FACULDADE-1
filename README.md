@@ -203,6 +203,10 @@ frontend/                                  React + Vite
 - Cada status vem com uma frase explicando **o que acontece agora**.
 - Confirmação antes de ações sem volta (excluir, cancelar, aprovar, rejeitar).
 - Mensagens de sucesso e erro aparecem e somem sozinhas.
+- **Ajuda contextual:** botão "?" ao lado das ações e campos que geram dúvida abre um passo a passo
+  com os passos do perfil de quem está usando (e um botão "Fazer agora") e as dúvidas frequentes relacionadas.
+  O menu **Ajuda** reúne tudo com busca. Os textos ficam em `frontend/src/ajuda.js`.
+- Guia completo de código, banco, API e apresentação: [GUIA_APRESENTACAO.md](GUIA_APRESENTACAO.md).
 
 ## Componentes reutilizados
 

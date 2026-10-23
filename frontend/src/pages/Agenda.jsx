@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
+import { BotaoAjuda } from '../components/Ajuda.jsx';
 import Icone from '../components/Icone.jsx';
 import { Esqueleto } from '../components/Comuns.jsx';
 import { CONTATO_EVENTOS, dataBR, hojeISO, partesData, somarDias } from '../util.js';
@@ -41,7 +42,7 @@ export default function Agenda() {
       <section className="destaque">
         <div>
           <span className="destaque-etiqueta">Agenda oficial</span>
-          <h1>Agenda de eventos</h1>
+          <h1>Agenda de eventos <BotaoAjuda topico="calendario" claro /></h1>
           <p>
             {agenda
               ? <>Eventos aprovados de <strong>{dataBR(agenda.inicio)}</strong> até <strong>{dataBR(agenda.fim)}</strong>.</>
@@ -50,12 +51,18 @@ export default function Agenda() {
         </div>
         {!usuario && (
           <div className="destaque-cta">
-            <Link to="/entrar" className="botao botao-claro"><Icone nome="mais" /> Quero solicitar um evento</Link>
+            <span className="linha-com-ajuda">
+              <Link to="/entrar" className="botao botao-claro"><Icone nome="mais" /> Quero solicitar um evento</Link>
+              <BotaoAjuda topico="solicitar" claro />
+            </span>
             <small>Para professores e coordenações. Dúvidas: <a href={`mailto:${CONTATO_EVENTOS}`}>{CONTATO_EVENTOS}</a></small>
           </div>
         )}
         {usuario?.perfil === 'SOLICITANTE' && (
-          <Link to="/solicitacoes/nova" className="botao botao-claro"><Icone nome="mais" /> Novo pedido de evento</Link>
+          <span className="linha-com-ajuda">
+            <Link to="/solicitacoes/nova" className="botao botao-claro"><Icone nome="mais" /> Novo pedido de evento</Link>
+            <BotaoAjuda topico="solicitar" claro />
+          </span>
         )}
       </section>
 

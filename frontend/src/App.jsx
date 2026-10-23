@@ -5,6 +5,7 @@ import Cabecalho from './components/Cabecalho.jsx';
 import { Carregando } from './components/Comuns.jsx';
 import Agenda from './pages/Agenda.jsx';
 import EventoPublico from './pages/EventoPublico.jsx';
+import Ajuda from './pages/Ajuda.jsx';
 import Login from './pages/Login.jsx';
 import MinhasSolicitacoes from './pages/MinhasSolicitacoes.jsx';
 import FormularioEvento from './pages/FormularioEvento.jsx';
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="/" element={<Agenda />} />
           <Route path="/eventos/:id" element={<EventoPublico />} />
           <Route path="/entrar" element={<Login />} />
+          <Route path="/ajuda" element={<Ajuda />} />
 
           <Route path="/minhas" element={<Protegida><MinhasSolicitacoes /></Protegida>} />
           <Route path="/solicitacoes/nova" element={<Protegida><FormularioEvento modo="solicitante" /></Protegida>} />

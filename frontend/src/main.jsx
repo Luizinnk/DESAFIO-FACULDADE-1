@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import { AuthProvider } from './auth.jsx';
 import { AvisosProvider } from './components/Avisos.jsx';
+import { AjudaProvider } from './components/Ajuda.jsx';
 import './styles.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -11,7 +12,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <AuthProvider>
         <AvisosProvider>
-          <App />
+          <AjudaProvider>
+            <App />
+          </AjudaProvider>
         </AvisosProvider>
       </AuthProvider>
     </BrowserRouter>

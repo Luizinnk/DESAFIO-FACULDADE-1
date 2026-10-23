@@ -72,6 +72,9 @@ export default function Cabecalho() {
             {itens.map((i) => <NavLink key={i.para} to={i.para} end={i.fim}>{rotulo(i)}</NavLink>)}
           </nav>
           <div className="conta">
+            <NavLink to="/ajuda" className="botao-ajuda-topo" aria-label="Ajuda" title="Ajuda">
+              <span className="botao-ajuda" aria-hidden="true">?</span><span className="texto-ajuda">Ajuda</span>
+            </NavLink>
             {usuario ? (
               <div className="menu-conta" ref={menuRef}>
                 <button className="avatar-botao" onClick={() => setMenuAberto(!menuAberto)} aria-expanded={menuAberto}
@@ -90,6 +93,7 @@ export default function Cabecalho() {
                     </div>
                     <Link to="/" role="menuitem"><Icone nome="agenda" /> Agenda pública</Link>
                     {admin && <Link to="/admin/usuarios" role="menuitem"><Icone nome="pessoas" /> Usuários</Link>}
+                    <Link to="/ajuda" role="menuitem"><Icone nome="info" /> Ajuda e dúvidas</Link>
                     <button role="menuitem" onClick={() => { setMenuAberto(false); setTrocandoSenha(true); }}><Icone nome="lapis" /> Trocar minha senha</button>
                     <button role="menuitem" onClick={fazerLogout}><Icone nome="sair" /> Sair</button>
                   </div>

@@ -74,7 +74,7 @@ export default function Cadastros() {
 
   return (
     <>
-      <TituloPagina titulo="Cadastros" subtitulo="Listas que aparecem para quem faz o pedido de evento." />
+      <TituloPagina titulo="Cadastros" ajuda="cadastros" subtitulo="Listas que aparecem para quem faz o pedido de evento." />
       <nav className="abas" aria-label="Tipo de cadastro">
         {Object.entries(TIPOS).map(([chave, t]) => (
           <NavLink key={chave} to={`/admin/cadastros/${chave}`} className={({ isActive }) => (isActive ? 'ativa' : '')}>{t.titulo}</NavLink>
@@ -94,7 +94,7 @@ export default function Cadastros() {
             <input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} />
           </Campo>
           {cfg.centro && (
-            <Campo rotulo="Centro de custo">
+            <Campo rotulo="Centro de custo" topicoAjuda="centro-custo">
               <select value={form.centroCustoId} onChange={(e) => setForm({ ...form, centroCustoId: e.target.value })}>
                 <option value="">Escolha…</option>
                 {apoio.centros.map((c) => <option key={c.id} value={c.id}>{c.codigo} - {c.nome}</option>)}
