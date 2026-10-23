@@ -9,7 +9,7 @@
 **Equipe:** ____________  **Representante:** ____________ (WhatsApp: ________)
 
 ## 1. Ideia geral da solução
-Hoje o setor de Eventos recebe pedidos por formulários soltos. Vamos criar o **agendaUNI**:
+Hoje o setor de Eventos recebe pedidos por formulários soltos. Vamos criar o **AgendaUNI**:
 um sistema web onde:
 - o **visitante** vê a grade pública de eventos aprovados (mês atual + 2 meses);
 - o **solicitante** faz login, preenche o pedido, salva rascunho ou envia;

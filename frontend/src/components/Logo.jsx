@@ -6,7 +6,7 @@ export default function Logo({ claro = false }) {
     <Link to="/" className={`logo ${claro ? 'logo-claro' : ''}`} aria-label="AgendaUNI — página inicial">
       <img src="/logo-univille.png" alt="" className="logo-simbolo" />
       <span className="logo-texto">
-        <span className="logo-nome">agenda<strong>UNI</strong></span>
+        <span className="logo-nome">Agenda<strong>UNI</strong></span>
         <span className="logo-sub">Eventos Univille</span>
       </span>
     </Link>

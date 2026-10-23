@@ -1,4 +1,4 @@
-# agendaUNI — Sistema de Gestão de Eventos Institucionais
+# AgendaUNI — Sistema de Gestão de Eventos Institucionais
 
 Projeto do **Software Engineering Challenge 2026 — Univille (Campus São Bento do Sul)**.
 

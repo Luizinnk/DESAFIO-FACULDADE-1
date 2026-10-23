@@ -17,7 +17,7 @@
 
 ### 1. Apresentação da solução
 
-A equipe propõe o desenvolvimento do **agendaUNI**, uma aplicação web destinada a consolidar,
+A equipe propõe o desenvolvimento do **AgendaUNI**, uma aplicação web destinada a consolidar,
 em um único ambiente, o recebimento, a análise, a aprovação e a divulgação dos eventos
 institucionais da Univille, substituindo o atual processo baseado em formulários dispersos.
 
@@ -124,6 +124,6 @@ sem depender de serviços externos durante a demonstração.
 
 ### B.5 Encerramento formal (fala final)
 
-"Em síntese, o agendaUNI atende aos três perfis definidos no caderno, aplica as regras de
+"Em síntese, o AgendaUNI atende aos três perfis definidos no caderno, aplica as regras de
 negócio exigidas e mantém os dados em um banco real. Agradecemos a atenção da banca e
 estamos à disposição para perguntas."

@@ -10,7 +10,7 @@
 
 ```
 +------------------------------------------------------------+
-| agendaUNI     Agenda                            [ Entrar ] |
+| AgendaUNI     Agenda                            [ Entrar ] |
 +------------------------------------------------------------+
 |                                                            |
 |  Agenda de eventos                                         |
@@ -41,7 +41,7 @@
 
 ```
 +----------------------------------+
-| agendaUNI   Agenda    [ Entrar ] |
+| AgendaUNI   Agenda    [ Entrar ] |
 +----------------------------------+
 |                                  |
 |        +--------------------+    |
@@ -67,7 +67,7 @@
 
 ```
 +------------------------------------------------------------+
-| agendaUNI   Agenda   Minhas solicitações      Carlos  Sair |
+| AgendaUNI   Agenda   Minhas solicitações      Carlos  Sair |
 +------------------------------------------------------------+
 |  Minhas solicitações                [ Nova solicitação ]   |
 |                                                            |
@@ -126,7 +126,7 @@
 
 ```
 +------------------------------------------------------------+
-| agendaUNI  Agenda  Solicitações  Cadastros  Usuários  Rel. |
+| AgendaUNI  Agenda  Solicitações  Cadastros  Usuários  Rel. |
 +------------------------------------------------------------+
 |  Solicitações                                              |
 |  [Aguardando]  Aprovado   Rejeitado   Cancelado            |
